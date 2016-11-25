@@ -427,7 +427,7 @@ THINKPHP是一个快速简单的轻量级国产PHP开发框架。
     var locatePost = $(".something-else").next();
     for(var i=0; i < 10; i++){
         
-        randomNum = Math.floor(Math.random() * 4 + 1);
+        randomNum = Math.floor(Math.random() * 9 + 1);
         
         locatePost.children(".post_thumbnail-random").attr('id', 'random_thumbnail-'+randomNum);
         locatePost.children(".post_thumbnail-random").css('background-image', 'url(' + '/img/random/' + randomNum + '.png' + ')')
