@@ -4,7 +4,7 @@
     <!-- Title -->
     
     <title>
-        Hello World | 東雲研究所
+        THINKPHP 快速入门 | 東雲研究所
     </title>
     
     <!-- Favicons -->
@@ -40,7 +40,7 @@
     <!-- The Open Graph protocol -->
     <meta property="og:url" content="http://yoursite.com">
     <meta property="og:type" content="blog">
-    <meta property="og:title" content="Hello World | 東雲研究所">
+    <meta property="og:title" content="THINKPHP 快速入门 | 東雲研究所">
     <meta property="og:description" content="keep it simple, stupid">
     
      <!--[if lte IE 9]>
@@ -246,7 +246,7 @@
 		
 	
         <p class="article-headline-p">
-            Hello World
+            THINKPHP 快速入门
         </p>
     </div>
 
@@ -264,7 +264,7 @@
     <!-- Author Name & Date -->
     <div>
         <strong>Catinsides</strong>
-        <span>11月 24, 2016</span>
+        <span>11月 25, 2016</span>
     </div>
     
     <div class="section-spacer"></div>
@@ -299,21 +299,21 @@
     
     
     <!-- Share Twitter -->
-    <a class="post_share-link" href="https://twitter.com/intent/tweet?text=Hello World&url=http://yoursite.com//2016/11/24/hello-world/index.html&via=Catinsides" target="_blank">
+    <a class="post_share-link" href="https://twitter.com/intent/tweet?text=THINKPHP 快速入门&url=http://yoursite.com//2016/11/25/THINKPHP-快速入门/index.html&via=Catinsides" target="_blank">
         <li class="mdl-menu__item">
             分享到 Twitter
         </li>
     </a>
     
     <!-- Share Google+ -->
-    <a class="post_share-link" href="https://plus.google.com/share?url=http://yoursite.com//2016/11/24/hello-world/index.html" target="_blank">
+    <a class="post_share-link" href="https://plus.google.com/share?url=http://yoursite.com//2016/11/25/THINKPHP-快速入门/index.html" target="_blank">
         <li class="mdl-menu__item">
             分享到 Google+
         </li>
     </a>
     
     <!-- Share Weibo -->
-    <a class="post_share-link" href="http://service.weibo.com/share/share.php?appkey=&title=Hello World&url=http://yoursite.com//2016/11/24/hello-world/index.html&pic=&searchPic=false&style=simple" target="_blank">
+    <a class="post_share-link" href="http://service.weibo.com/share/share.php?appkey=&title=THINKPHP 快速入门&url=http://yoursite.com//2016/11/25/THINKPHP-快速入门/index.html&pic=&searchPic=false&style=simple" target="_blank">
         <li class="mdl-menu__item">
             分享到微博
         </li>
@@ -325,7 +325,77 @@
                 <!-- Post Content -->
                 <div id="post-content" class="markdown-Github mdl-color-text--grey-700 mdl-card__supporting-text fade out">
 	
-		<p>Hello,world!<br>:)</p>
+		<blockquote>
+<p>THINKPHP是一个快速简单的轻量级国产PHP开发框架。</p>
+</blockquote>
+<p>本文介绍了其基础的功能，方便新手快速入门。<br>闲话少叙，下面开始:)</p>
+<p>###一、环境<br>建议使用wamp、lamp搭建测试环境，下载安装即可。<br>从官网下载THINKPHP 3.2版本的压缩包，解压后放到wamp(lamp)下的www文件夹内。<br>在浏览器地址栏输入<a href="http://localhost即可看到欢迎界面。" target="_blank" rel="external">http://localhost即可看到欢迎界面。</a></p>
+<p>###二、路由<br>THINKPHP采用模块化设计，每个模块文件下都有相应的配置文件。<br>本文只配置一个模块Home，为了后面方便，仅需在Application/Common/Conf/config.php<br>配置即可。即此后提到的配置文件语句，均写到此文件内。<br>打开config.php, 保留语句为<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">return</span> <span class="keyword">array</span>();</div></pre></td></tr></table></figure></p>
+<p>在括号内写入，<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="string">'URL_ROUTER_ON'</span>   =&gt; <span class="keyword">true</span>, <span class="comment">//开启路由</span></div><div class="line"><span class="string">'URL_ROUTE_RULES'</span>=&gt;<span class="keyword">array</span>(</div><div class="line">    <span class="string">'create'</span> =&gt; <span class="string">'Home/Index/cre'</span>,</div><div class="line">    <span class="string">'update'</span> =&gt; <span class="string">'Home/Index/upd'</span>,</div><div class="line">    <span class="string">'retrieve'</span> =&gt; <span class="string">'Home/Index/ret'</span>,</div><div class="line">    <span class="string">'delete'</span> =&gt; <span class="string">'Home/Index/del'</span>,</div><div class="line">    ), <span class="comment">//CURD操作</span></div></pre></td></tr></table></figure></p>
+<p>此处路由规则的含义是，当在浏览器地址栏输入<br><a href="http://localhost/index.php/create" target="_blank" rel="external">http://localhost/index.php/create</a><br>时，相当于访问<br><a href="http://localhost/index.php/Home/Index/cre" target="_blank" rel="external">http://localhost/index.php/Home/Index/cre</a>,<br>即Home模块下Index控制类下的cre方法，以此类推。<br>当路由中包含参数时，在参数前添加’:’，匹配时$_GET[]会获取相应的参数，例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&apos;create/:id\d/:code\d&apos; =&gt; &apos;Home/Index/cre&apos;,</div></pre></td></tr></table></figure></p>
+<p>\d为使用正则限制路由参数。</p>
+<p>###三、控制器<br>控制器类文件命名的规则是首字母大写，驼峰命名法，并以.class.php结尾。<br>在路径Application/Home/Controller/下，新建文件重命名为IndexController.class.php<br>打开文件添加代码，<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">namespace</span> <span class="title">Home</span>\<span class="title">Controller</span>;</div><div class="line"><span class="keyword">use</span> <span class="title">Think</span>\<span class="title">Controller</span>;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">IndexController</span> <span class="keyword">extends</span> <span class="title">Controller</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">ret</span><span class="params">()</span></span>&#123;</div><div class="line">        $Test = D(<span class="string">'test'</span>);               <span class="comment">//使用内置D方法初始化模型类Test</span></div><div class="line">        $temp = $Test-&gt;get_coupon();     <span class="comment">//使用模型类中的get_coupon()方法</span></div><div class="line">        <span class="keyword">$this</span> -&gt; assign(<span class="string">'temp'</span>,$temp);   <span class="comment">//模板赋值</span></div><div class="line">        <span class="keyword">$this</span> -&gt; display(<span class="string">'main'</span>);        <span class="comment">//模板渲染</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">upd</span><span class="params">()</span></span>&#123;</div><div class="line">        $data[<span class="string">'id'</span>] = <span class="number">99</span>;</div><div class="line">        $data[<span class="string">'code'</span>] = <span class="number">123456789</span>;</div><div class="line">        $Test = M(<span class="string">'test'</span>);              <span class="comment">//内置M方法</span></div><div class="line">        $Test -&gt; add($data);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">cre</span><span class="params">()</span></span>&#123;</div><div class="line">        $_GET[<span class="string">'id'</span>] = $data[<span class="string">'id'</span>];      <span class="comment">//获取url中的参数</span></div><div class="line">        $_GET[<span class="string">'code'</span>] = $data[<span class="string">'code'</span>];</div><div class="line">        $Test = M(<span class="string">'test'</span>);</div><div class="line">        $Test -&gt; where(<span class="string">'id=2'</span>) -&gt; save($data);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">del</span><span class="params">()</span></span>&#123;</div><div class="line">        $data[<span class="string">'id'</span>] = <span class="number">99</span>;</div><div class="line">        $data[<span class="string">'code'</span>] = <span class="number">123456789</span>;</div><div class="line">        $Test = M(<span class="string">'test'</span>);</div><div class="line">        $Test -&gt; where(<span class="string">'id=1'</span>) -&gt; delete();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上代码的方法对应着CURD操作，当路由匹配到方法时，对数据表进行相应的操作。</p>
+<p>当不使用$_GET，而是直接将url内的参数传入到控制器内的方法时，<br>首先，在配置文件中添加<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="string">'URL_PARAMS_BIND'</span>       =&gt;  <span class="keyword">true</span>,</div></pre></td></tr></table></figure></p>
+<p>开启参数绑定。<br>以上述ret()函数为例,<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">cre</span><span class="params">($id,$code)</span></span>&#123;</div><div class="line">        $data[<span class="string">'id'</span>] = $id;</div><div class="line">        $data[<span class="string">'code'</span>] = $code;</div><div class="line">        $Test = M(<span class="string">'test'</span>);</div><div class="line">        $Test -&gt; where(<span class="string">'id=2'</span>) -&gt; save($data);</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>访问 <a href="http://localhost/index.php/Home/Index/ret/id/01/code/12345" target="_blank" rel="external">http://localhost/index.php/Home/Index/ret/id/01/code/12345</a> 时，即可传入相应的参数。当然，路由规则也需要加入相应的关键字。</p>
+<p>这里简单说一下内置D方法和M方法的区别。</p>
+<ul>
+<li>当使用THINKPHP模型中的自动验证、关联模型等复杂业务逻辑功能时，使用D方法。</li>
+<li>当仅使用CURD操作时，使用M方法。</li>
+</ul>
+<p>###四、模型<br>模型类文件创建在Application/Home/Model/下，同样采用首字母大写，驼峰规则，以<br>.class.php结尾命名。注意文件名要与控制器类的名称一致。<br>打开文件添加代码，<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">namespace</span> <span class="title">Home</span>\<span class="title">Model</span>;</div><div class="line"><span class="keyword">use</span> <span class="title">Think</span>\<span class="title">Model</span>;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestModel</span> <span class="keyword">extends</span> <span class="title">Model</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">get_coupon</span><span class="params">()</span></span>&#123;</div><div class="line">        $arr = <span class="keyword">$this</span> -&gt; select();</div><div class="line">        <span class="keyword">return</span> $arr;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>因为在控制器类中使用了get_coupon()方法，所以这里要把它加进去。如果有其他对模型操作的方法都可以写进来，当然写在控制器类也可以，但是为了代码功能明晰，建议分开写。</p>
+<p>数据库连接参数写入配置文件，<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="string">'DB_TYPE'</span>  =&gt; <span class="string">'mysql'</span>,</div><div class="line"><span class="string">'DB_USER'</span>  =&gt; <span class="string">'root'</span>,</div><div class="line"><span class="string">'DB_PWD'</span>   =&gt; <span class="string">'1234'</span>,</div><div class="line"><span class="string">'DB_HOST'</span>  =&gt; <span class="string">'127.0.0.1'</span>,</div><div class="line"><span class="string">'DB_PORT'</span>  =&gt; <span class="string">'3306'</span>,</div><div class="line"><span class="string">'DB_NAME'</span>  =&gt; <span class="string">'coupon'</span>,  <span class="comment">//这是测试用的数据表</span></div></pre></td></tr></table></figure></p>
+<p>开发文档中提到了可以将配置信息生成为数组，但是不在模型类调用这一数组时，不要将配置信息组合为数组。</p>
+<p>测试表coupon内容如下：</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>code     </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>SUFFLzS</td>
+</tr>
+<tr>
+<td>1</td>
+<td>hZxakCl</td>
+</tr>
+<tr>
+<td>2</td>
+<td>xD2gz0N</td>
+</tr>
+<tr>
+<td>3</td>
+<td>6WwLt7U</td>
+</tr>
+<tr>
+<td>4</td>
+<td>xLSxY1n</td>
+</tr>
+<tr>
+<td>5</td>
+<td>bn422Ka</td>
+</tr>
+<tr>
+<td>6</td>
+<td>55BaQ0C</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Ui1Jc8P</td>
+</tr>
+</tbody>
+</table>
+<p>###五、模板<br>模型类文件创建在Application/Home/View/Index/下,与控制器类内代码相对应，新建main.html文件，添加以下代码：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>测试主页<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">foreach</span> <span class="attr">name</span>=<span class="string">'temp'</span> <span class="attr">item</span>=<span class="string">'coupon'</span>&gt;</span></div><div class="line">&#123;$coupon.id&#125;:&#123;$coupon.code&#125;<span class="tag">&lt;<span class="name">br</span>/&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">foreach</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure>
+<p><code>&lt;foreach&gt;</code>是内置的标签，可以将数据循环输出。其中temp是控制器类内的数组名称，coupon为自定义名称，id和code为数组内的键名。</p>
+<p>在浏览器地址栏访问 <a href="http://localhost/index.php/Home/Index/cre" target="_blank" rel="external">http://localhost/index.php/Home/Index/cre</a> 时，<br>页面显示为<br><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">0:SUFFLzS</div><div class="line">1:hZxakCl</div><div class="line">2:xD2gz0N</div><div class="line">3:6WwLt7U</div><div class="line">4:xLSxY1n</div><div class="line">5:bn422Ka</div><div class="line">6:55BaQ0C</div><div class="line">7:Ui1Jc8P</div></pre></td></tr></table></figure></p>
+<p>###六、总结与吐槽<br>以下是总结：<br>至此，THINKEPHP 3.2的快速入门教程已经完成。本文对路由规则分配，控制器操作模型、渲染模板进行了简单的介绍。如果想深入了解框架的其他知识，还请移步官方文档。至于MySQL的相关知识，还是另开一篇文章好了。<br>以下是吐槽：<br>“什么AUIMD方法真的是反人类啊，不能顾名思义的方法都不是好方法！”，一位绞尽脑汁想不到新变量名称的程序员说道。</p>
 
 	
 	
@@ -346,19 +416,19 @@
     
     <!-- Prev Nav -->
     
-        <a href="/2016/11/25/THINKPHP-快速入门/" id="post_nav-newer" class="prev-content">
-            <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900" role="presentation">
-                <i class="material-icons">arrow_back</i>
-            </button>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            新篇
-        </a>
-    
 
     <!-- Section Spacer -->
     <div class="section-spacer"></div>
 
     <!-- Next Nav -->
+    
+        <a href="/2016/11/24/hello-world/" id="post_nav-older" class="next-content">
+            旧篇
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900" role="presentation">
+                <i class="material-icons">arrow_forward</i>
+            </button>
+        </a>
     
 </nav>
         </div>
