@@ -1,0 +1,374 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="keep it simple, stupid"><title>码农札记 | 東雲研究所</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/5.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/catinsides.github.io/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/catinsides.github.io/favicon.ico"><link rel="apple-touch-icon" href="/catinsides.github.io/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/catinsides.github.io/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">码农札记</h1><a id="logo" href="/catinsides.github.io/.">東雲研究所</a><p class="description"></p></div><div id="nav-menu"><a href="/catinsides.github.io/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/catinsides.github.io/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/catinsides.github.io/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">码农札记</h1><div class="post-meta">May 15, 2017<script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="clear"><div id="toc" class="toc-article"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Git"><span class="toc-number">1.</span> <span class="toc-text">Git</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#日常操作"><span class="toc-number">1.1.</span> <span class="toc-text">日常操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#远程仓库"><span class="toc-number">1.2.</span> <span class="toc-text">远程仓库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#进阶"><span class="toc-number">1.3.</span> <span class="toc-text">进阶</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#标签管理"><span class="toc-number">1.4.</span> <span class="toc-text">标签管理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Linux"><span class="toc-number">2.</span> <span class="toc-text">Linux</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#文件命令"><span class="toc-number">2.1.</span> <span class="toc-text">文件命令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#进程管理"><span class="toc-number">2.2.</span> <span class="toc-text">进程管理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#文件权限"><span class="toc-number">2.3.</span> <span class="toc-text">文件权限</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SSH"><span class="toc-number">2.4.</span> <span class="toc-text">SSH</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#搜索"><span class="toc-number">2.5.</span> <span class="toc-text">搜索</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#系统信息"><span class="toc-number">2.6.</span> <span class="toc-text">系统信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#压缩"><span class="toc-number">2.7.</span> <span class="toc-text">压缩</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#网络"><span class="toc-number">2.8.</span> <span class="toc-text">网络</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#安装"><span class="toc-number">2.9.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#快捷键"><span class="toc-number">2.10.</span> <span class="toc-text">快捷键</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#VIM"><span class="toc-number">3.</span> <span class="toc-text">VIM</span></a></li></ol></div></div><div class="post-content"><h3 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h3><h4 id="日常操作"><a href="#日常操作" class="headerlink" title="日常操作"></a>日常操作</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">//获取远端代码</div><div class="line">git fetch upstream xxxx</div><div class="line"></div><div class="line">//将远端代码合并到本地</div><div class="line">git merge upstream/xxxx</div><div class="line"></div><div class="line">//获取并合并代码</div><div class="line">git pull</div><div class="line"></div><div class="line">//查看不同(工作区与暂存区)</div><div class="line">git diff</div><div class="line"></div><div class="line">//查看工作区修改的文件</div><div class="line">git status</div><div class="line"></div><div class="line">//放弃工作区的修改</div><div class="line">git checkout</div><div class="line"></div><div class="line">//将修改的文件提交到暂存区</div><div class="line">git add</div><div class="line"></div><div class="line">//提交更改</div><div class="line">git commit -m &quot;注释&quot;</div><div class="line"></div><div class="line">//提交到远端</div><div class="line">git push origin xxxx</div><div class="line"></div><div class="line">//查看提交日志</div><div class="line">git log (--pretty=oneline)</div><div class="line"></div><div class="line">//版本回退</div><div class="line">git reset --hard HEAD^   //上一个版本</div><div class="line">git reset --hard HEAD^^  //上上一个版本</div><div class="line">git reset --hard HEAD~20 //上20个版本</div><div class="line"></div><div class="line">//回到未来</div><div class="line">git reflog</div><div class="line">git reset</div><div class="line"></div><div class="line">//删除文件</div><div class="line">git rm</div><div class="line">git commit</div></pre></td></tr></table></figure>
+<h4 id="远程仓库"><a href="#远程仓库" class="headerlink" title="远程仓库"></a>远程仓库</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">/* 创建SSH KEY</div><div class="line"> * 用户目录 .ssh/</div><div class="line"> * id_rsa 私钥</div><div class="line"> * id_rsa.pub 公钥</div><div class="line"> */</div><div class="line">$ ssh-keygen -t rsa -C &quot;my@email.com&quot;</div><div class="line"></div><div class="line">//在Github上 Add SSH Key, 粘贴公钥内容</div><div class="line"></div><div class="line">//克隆远端代码</div><div class="line">git clone some_url</div></pre></td></tr></table></figure>
+<h4 id="进阶"><a href="#进阶" class="headerlink" title="进阶"></a>进阶</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">//创建并切换到分支</div><div class="line">git checkout -b dev</div><div class="line"></div><div class="line">//等同于</div><div class="line">git branch dev</div><div class="line">git checkout dev</div><div class="line"></div><div class="line">//查看分支</div><div class="line">git branch</div><div class="line"></div><div class="line">//合并分支</div><div class="line">git merge</div><div class="line"></div><div class="line">//删除分支</div><div class="line">git branch -d</div><div class="line"></div><div class="line">//查看分支合并图</div><div class="line">git log --graph</div><div class="line"></div><div class="line">//分支策略</div><div class="line">git merge --no-ff -m &quot;注释&quot; dev</div><div class="line"></div><div class="line">//Bug分支</div><div class="line">//暂存修改</div><div class="line">1. $ git stash</div><div class="line"></div><div class="line">//回到master，并创建新分支，修复后提交</div><div class="line">2. $ git checkout master</div><div class="line">   $ git checkout -b issue-101</div><div class="line">   $ git commit -m &quot;fix-issue-101&quot;</div><div class="line"></div><div class="line">//合并bug分支并删除</div><div class="line">3. $ git checkout master</div><div class="line">   $ git merge --no-ff -m &quot;m-merge-issue-101&quot; issue-101</div><div class="line">   $ git branch -d issue-101</div><div class="line"></div><div class="line">//将修复bug后的master合并到dev</div><div class="line">4. $ git checkout dev</div><div class="line">   $ git merge --no-ff -m &quot;dev-merge-m&quot; master</div><div class="line"></div><div class="line">//弹出暂存的修改</div><div class="line">5. $ git stash pop</div><div class="line"></div><div class="line">//修复冲突</div><div class="line">6. $ git commit -m &quot;fixconflict &amp; append something&quot;</div><div class="line"></div><div class="line">//完成后提交</div><div class="line">7. $ git checkout master</div><div class="line">   $ git merge --no-ff -m &quot;m-merge-dev&quot; dev</div><div class="line">   $ git branch -d dev</div></pre></td></tr></table></figure>
+<h4 id="标签管理"><a href="#标签管理" class="headerlink" title="标签管理"></a>标签管理</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">//创建标签，默认HEAD，也可指定commit id</div><div class="line">git tag &lt;name&gt;</div><div class="line"></div><div class="line">//指定标签信息</div><div class="line">git tag -a &lt;tagname&gt; -m &quot;message&quot;</div><div class="line"></div><div class="line">//PGP签名标签</div><div class="line">git tag -s &lt;tagname&gt; -m &quot;message&quot;</div><div class="line"></div><div class="line">//查看所有标签</div><div class="line">git tag</div><div class="line"></div><div class="line">//推送本地标签</div><div class="line">git push origin &lt;tagname&gt;</div><div class="line"></div><div class="line">//推送全部本地未推送的标签</div><div class="line">git push origin --tags</div><div class="line"></div><div class="line">//删除一个本地标签</div><div class="line">git tag -d &lt;tagname&gt;</div><div class="line"></div><div class="line">//删除一个远程标签</div><div class="line">git push origin :refs/tags/&lt;tagname&gt;</div></pre></td></tr></table></figure>
+<h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h3><h4 id="文件命令"><a href="#文件命令" class="headerlink" title="文件命令"></a>文件命令</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ls</td>
+<td>列出目录</td>
+</tr>
+<tr>
+<td>ls -al</td>
+<td>使用格式化列出隐藏文件</td>
+</tr>
+<tr>
+<td>cd dir</td>
+<td>更改目录到dir</td>
+</tr>
+<tr>
+<td>cd</td>
+<td>更改到home目录</td>
+</tr>
+<tr>
+<td>pwd</td>
+<td>显示当前目录</td>
+</tr>
+<tr>
+<td>mkdir dir</td>
+<td>创建目录dir</td>
+</tr>
+<tr>
+<td>rm file</td>
+<td>删除file</td>
+</tr>
+<tr>
+<td>rm -r dir</td>
+<td>删除目录dir</td>
+</tr>
+<tr>
+<td>rm -f file</td>
+<td>强制删除file</td>
+</tr>
+<tr>
+<td>rm -rf dir</td>
+<td>强制删除目录dir</td>
+</tr>
+<tr>
+<td>cp file1 file2</td>
+<td>将file1复制到file2</td>
+</tr>
+<tr>
+<td>cp -r dir1 dir2</td>
+<td>将file1复制到dir2，如果dir2不存在则创建它</td>
+</tr>
+<tr>
+<td>mv file1 file2</td>
+<td>将file1重命名或移动到file2，若file2存在则移动</td>
+</tr>
+<tr>
+<td>ln -s file link</td>
+<td>创建file的符号连接link</td>
+</tr>
+<tr>
+<td>touch file</td>
+<td>创建file</td>
+</tr>
+<tr>
+<td>cat &gt; file</td>
+<td>将标准输入添加到file</td>
+</tr>
+<tr>
+<td>more file</td>
+<td>查看file的内容</td>
+</tr>
+<tr>
+<td>head file</td>
+<td>查看file的前10行</td>
+</tr>
+<tr>
+<td>tail file</td>
+<td>查看file的后10行</td>
+</tr>
+<tr>
+<td>tail -f file</td>
+<td>从后10行开始查看file的内容</td>
+</tr>
+</tbody>
+</table>
+<h4 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ps</td>
+<td>显示当前的活动进程</td>
+</tr>
+<tr>
+<td>top</td>
+<td>显示所有正在运行的进程</td>
+</tr>
+<tr>
+<td>kill pid</td>
+<td>杀掉进程id pid</td>
+</tr>
+<tr>
+<td>killall proc</td>
+<td>杀掉所有名为proc的进程</td>
+</tr>
+<tr>
+<td>bg</td>
+<td>列出已停止或后台的作业</td>
+</tr>
+<tr>
+<td>fg</td>
+<td>将最近的作业带到前台</td>
+</tr>
+<tr>
+<td>fg n</td>
+<td>将作业n带到前台</td>
+</tr>
+</tbody>
+</table>
+<h4 id="文件权限"><a href="#文件权限" class="headerlink" title="文件权限"></a>文件权限</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chmod octal file</td>
+<td>更改file的权限</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>4 读（r）</li>
+<li>2 写（w）</li>
+<li>1 执行（x）</li>
+</ul>
+<h4 id="SSH"><a href="#SSH" class="headerlink" title="SSH"></a>SSH</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ssh user@host</td>
+<td>以user用户连接到host</td>
+</tr>
+<tr>
+<td>ssh -p port user@host</td>
+<td>在端口port以user用户身份连接到host</td>
+</tr>
+<tr>
+<td>ssh-copy-id user@host</td>
+<td>将密钥添加到host以实现无密码登录</td>
+</tr>
+</tbody>
+</table>
+<h4 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>grep pattern files</td>
+<td>搜索files中匹配pattern的内容</td>
+</tr>
+<tr>
+<td>grep -r pattern dir</td>
+<td>递归搜索dir中匹配pattern的内容</td>
+</tr>
+<tr>
+<td>command l grep pattern</td>
+<td>搜索command输出中匹配pattern的内容</td>
+</tr>
+</tbody>
+</table>
+<h4 id="系统信息"><a href="#系统信息" class="headerlink" title="系统信息"></a>系统信息</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>date</td>
+<td>显示当前日期和时间</td>
+</tr>
+<tr>
+<td>cal</td>
+<td>显示当月的日历</td>
+</tr>
+<tr>
+<td>uptime</td>
+<td>显示系统从开机到现在所运行的时间</td>
+</tr>
+<tr>
+<td>w</td>
+<td>显示登录的用户</td>
+</tr>
+<tr>
+<td>whoami</td>
+<td>查看你的当前用户名</td>
+</tr>
+<tr>
+<td>finger user</td>
+<td>显示user的相关信息</td>
+</tr>
+<tr>
+<td>uname -a</td>
+<td>显示内核信息</td>
+</tr>
+<tr>
+<td>cat /proc/cpuinfo</td>
+<td>查看cpu的信息</td>
+</tr>
+<tr>
+<td>cat /proc/meminfo</td>
+<td>查看内存信息</td>
+</tr>
+<tr>
+<td>man command</td>
+<td>显示command的说明手册</td>
+</tr>
+<tr>
+<td>df</td>
+<td>显示磁盘占用情况</td>
+</tr>
+<tr>
+<td>du</td>
+<td>显示目录空间占用情况</td>
+</tr>
+<tr>
+<td>free</td>
+<td>显示内存及交换区占用情况</td>
+</tr>
+</tbody>
+</table>
+<h4 id="压缩"><a href="#压缩" class="headerlink" title="压缩"></a>压缩</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tar cf file.tar files</td>
+<td>创建包含files的tar文件file.tar</td>
+</tr>
+<tr>
+<td>tar xf file.tar</td>
+<td>从file.tar提取文件</td>
+</tr>
+<tr>
+<td>tar czf file.tar.gz files</td>
+<td>使用Gzip压缩创建tar文件</td>
+</tr>
+<tr>
+<td>tar xzf file.tar.gz</td>
+<td>使用Gzip提取tar文件</td>
+</tr>
+<tr>
+<td>tar cjf file.tar.bz2</td>
+<td>使用Bzip2压缩创建tar文件</td>
+</tr>
+<tr>
+<td>tar xjf file.tar.bz2</td>
+<td>使用Bzip2提取tar文件</td>
+</tr>
+<tr>
+<td>gzip file</td>
+<td>压缩file并重命名为file.gz</td>
+</tr>
+<tr>
+<td>gzip -d file.gz</td>
+<td>将file.gz解压缩为file</td>
+</tr>
+</tbody>
+</table>
+<h4 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ping host</td>
+<td>ping host并输出结果</td>
+</tr>
+<tr>
+<td>whois domain</td>
+<td>获取domain的whois信息</td>
+</tr>
+<tr>
+<td>dig domain</td>
+<td>获取domain的DNS信息</td>
+</tr>
+<tr>
+<td>dig -x host</td>
+<td>逆向查询host</td>
+</tr>
+<tr>
+<td>wget file</td>
+<td>下载file</td>
+</tr>
+<tr>
+<td>wget -c file</td>
+<td>断点续传</td>
+</tr>
+</tbody>
+</table>
+<h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>从源代码安装：<br><code>./configure</code><br><code>make</code><br><code>make install</code><br><code>dpkg -i pkg.deb</code><br><code>rpm -Uvh pkg.rpm</code></p>
+<h4 id="快捷键"><a href="#快捷键" class="headerlink" title="快捷键"></a>快捷键</h4><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ctrl + C</td>
+<td>停止当前命令</td>
+</tr>
+<tr>
+<td>Ctrl + Z</td>
+<td>停止当前命令，并使用fg恢复</td>
+</tr>
+<tr>
+<td>Ctrl + D</td>
+<td>注销当前会话，与exit相似</td>
+</tr>
+<tr>
+<td>Ctrl + W</td>
+<td>删除当前行中的字</td>
+</tr>
+<tr>
+<td>Ctrl + U</td>
+<td>删除整行</td>
+</tr>
+<tr>
+<td>!!</td>
+<td>重复上次的命令</td>
+</tr>
+<tr>
+<td>exit</td>
+<td>注销当前会话</td>
+</tr>
+</tbody>
+</table>
+<h3 id="VIM"><a href="#VIM" class="headerlink" title="VIM"></a>VIM</h3><p><img src="http://okzvvfkr0.bkt.clouddn.com/VIM.jpg" alt=""></p>
+</div><div class="tags"><a href="/catinsides.github.io/tags/笔记/">笔记</a></div><div class="post-nav"><a href="/catinsides.github.io/2017/05/15/JS野生程序员进修指南/" class="pre">JS野生程序员进修指南</a><a href="/catinsides.github.io/2017/03/30/Composer搭建MVC框架/" class="next">Composer搭建MVC框架</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="https://catinsides.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/catinsides.github.io/tags/PHP/" style="font-size: 15px;">PHP</a> <a href="/catinsides.github.io/tags/笔记/" style="font-size: 15px;">笔记</a> <a href="/catinsides.github.io/tags/Hello-world/" style="font-size: 15px;">Hello world</a> <a href="/catinsides.github.io/tags/Python/" style="font-size: 15px;">Python</a> <a href="/catinsides.github.io/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/catinsides.github.io/tags/Javascript/" style="font-size: 15px;">Javascript</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2017/05/15/JS野生程序员进修指南/">JS野生程序员进修指南</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2017/05/15/杂记/">码农札记</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2017/03/30/Composer搭建MVC框架/">Composer搭建MVC框架</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2017/02/07/SCRAPY爬取智联招聘信息/">SCRAPY爬取智联招聘信息</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2017/01/26/如何编写自己的MVC框架/">如何编写自己的MVC框架</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2016/12/26/Leetcode.Database-题解笔记（下）/">Leetcode.Database 题解笔记（下）</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2016/12/26/Leetcode.Database-题解笔记（上）/">Leetcode.Database 题解笔记（上）</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2016/12/19/SCRAPY-简单入门/">SCRAPY 简单入门</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2016/11/26/CodeIgniter-简单入门/">CodeIgniter 简单入门</a></li><li class="post-list-item"><a class="post-list-link" href="/catinsides.github.io/2016/11/26/Threejs读取STL文件/">Threejs读取STL文件</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="https://github.com/Catinsides" title="Me" target="_blank">Me</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">© <a href="/catinsides.github.io/." rel="nofollow">東雲研究所.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/catinsides.github.io/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/catinsides.github.io/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/catinsides.github.io/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/catinsides.github.io/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/catinsides.github.io/js/smartresize.js?v=0.0.0"></script></div></body></html>
