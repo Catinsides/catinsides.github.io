@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>JT1078协议开发之实时视频后记 | catinsides.github.io</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="记录一下JT1078协议中实时视频功能的开发流程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JT1078协议开发之实时视频后记">
+<meta property="og:url" content="https://catinsides.github.io/2019/03/16/JT1078%E5%8D%8F%E8%AE%AE%E5%BC%80%E5%8F%91%E4%B9%8B%E5%AE%9E%E6%97%B6%E8%A7%86%E9%A2%91%E5%90%8E%E8%AE%B0/index.html">
+<meta property="og:site_name" content="catinsides.github.io">
+<meta property="og:description" content="记录一下JT1078协议中实时视频功能的开发流程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-03-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-03-28T02:33:24.647Z">
+<meta property="article:author" content="catinsides">
+<meta property="article:tag" content="笔记">
+<meta property="article:tag" content="JT1078">
+<meta property="article:tag" content="FFmpeg">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">catinsides.github.io</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Catinsides">Github</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-JT1078协议开发之实时视频后记" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      JT1078协议开发之实时视频后记
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2019-03-15T16:00:00.000Z" itemprop="datePublished">三月 16, 2019, 12:00 凌晨</time>
+
+          
+            × <span class="article-word-count">2.6k words</span>
+            
+            × <span class="article-time-to-read">9 minutes</span>
+            
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>前几个月一直在进行JT&#x2F;T 1078协议（以下简称1078）相关项目的开发，其中涉及各种音视频协议和网络协议，还有音视频服务器和处理软件的知识。从一开始处于知识盲区的我，一路摸爬滚打，google和阅读书籍，挖坑填坑，总算是把项目需要的功能给研究出来了。当然，1078本身描述的功能很多，全部实现需要大量的人力和时间，一篇文章也不可能讲完。所以，打算用两篇文章主要记录一下实时视频和双向对讲的实现方法。这一篇为实时视频，双向对讲放在下一篇。功能皆使用 <strong>nodejs</strong> 和 <strong>FFmpeg</strong> 实现，系统环境为 <strong>Linux</strong> .</p>
+<h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><p>项目需求简单地说就是，有一台支持1078协议的设备，接收特定指令后，通过协议内容将音视频数据发送至服务器（以下简称推流），服务器再将音视频数据转发出去，使得客户端或者网页播放器能够收看到设备发送的数据（以下简称拉流），以达到实时视频的效果。后面功能的实现皆为网页端操作。</p>
+<p>所以至少要准备：</p>
+<ul>
+<li>1078协议文档</li>
+<li>1078协议设备</li>
+<li>音视频服务器</li>
+<li>播放器</li>
+</ul>
+<h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><p>实时视频流程大致如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">participant 网页</span><br><span class="line">participant 服务器</span><br><span class="line">participant 设备</span><br><span class="line"></span><br><span class="line">网页 -&gt;&gt; 设备: 下达推送视频指令</span><br><span class="line">设备 -&gt;&gt; 服务器: 推送视频数据</span><br><span class="line">服务器 -&gt;&gt; 网页: 转换为网页支持的格式</span><br></pre></td></tr></table></figure>
+
+<h3 id="音视频服务器与解析"><a href="#音视频服务器与解析" class="headerlink" title="音视频服务器与解析"></a>音视频服务器与解析</h3><p>下达推送指令部分可按照协议要求的格式轻松搞定，主要问题在于如何将设备的音视频数据推流至服务器。服务器再转换为网页端能够拉流播放的格式。说到视频直播，推流拉流，首先想到的是RTMP。在搜索引擎中搜一搜，支持RTMP的音视频服务器，无论是开源还是闭源，都有很多。首先找到一个部署方便的，放在服务器上待命。<br>部署完成之后，可以使用FFmpeg推送本地文件至服务器测试好不好用。</p>
+<p>FFmpeg命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -re -i localFile.mp4 -c copy -f flv rtmp://server:1935/live/streamName</span><br></pre></td></tr></table></figure>
+
+<p>RTMP链接后部分可能根据服务器有所不同。端口一般为1935.<br>播放RTMP链接，可以使用FFmpeg内置的ffplay，或者其他在线播放网站即可。</p>
+<p>由1078文档内容可知，设备的音视频传输方式，定义在 <strong>5.5.3</strong> 部分。</p>
+<blockquote>
+<p>实时音视频流数据的传输参考RTP协议，使用UDP或TCP承载。</p>
+</blockquote>
+<p>可知，设备推流并不是RTMP协议，而是魔改的RTP协议，具体内容在表19中。这和服务器接收的数据协议不同，所以需要将设备推流转换为服务器能够接收的协议格式。<br>第一次搞这种东西，只看文档一头雾水，没别的办法，搭建一个TCP服务，让设备把数据发过来，验证数据格式是否与文档中描述的一致。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> net = <span class="built_in">require</span>(<span class="string">&#x27;net&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">HOST</span> = <span class="string">&#x27;xx&#x27;</span>, <span class="variable constant_">PORT</span> = <span class="string">&#x27;xx&#x27;</span>;    <span class="comment">// 在下发指令中指定</span></span><br><span class="line"><span class="keyword">const</span> server = net.<span class="title function_">createServer</span>(<span class="function"><span class="params">socket</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;TCP Server Created!&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;error&#x27;</span>, <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;TCP Server Error ==&#x27;</span>, err);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;end&#x27;</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;TCP Server Closed.&#x27;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">setKeepAlive</span>(<span class="literal">true</span>, <span class="number">2000</span>);</span><br><span class="line">    socket.<span class="built_in">setTimeout</span>(<span class="number">10000</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">        socket.<span class="title function_">end</span>(<span class="string">&#x27;TCP Socket Broken.&#x27;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line">server.<span class="title function_">listen</span>(<span class="variable constant_">PORT</span>, <span class="variable constant_">HOST</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`Server Start Successfully, Listen on <span class="subst">$&#123;PORT&#125;</span>.`</span>);</span><br><span class="line">&#125;);</span><br><span class="line">server.<span class="title function_">on</span>(<span class="string">&#x27;connection&#x27;</span>, <span class="function"><span class="params">socket</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> &#123; remoteAddress &#125; = socket, &#123; address, port &#125; = socket.<span class="title function_">address</span>();</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Address is &#x27;</span>, address, <span class="string">&#x27;. Port is&#x27;</span>, port, <span class="string">&#x27;. remoteAddress is &#x27;</span>, remoteAddress);</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;data&#x27;</span>, <span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// console.log(&#x27;TCP ON DATA&#x27;);</span></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;end&#x27;</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Bye&#x27;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>设备推流后会触发socket的on data 事件，由于data是Buffer，所以需要把data转换成 <strong>16进制</strong> 的数据才能对照文档分析。转换完成后，可以大致看到一些规律，与文档中描述的一致。一个data变量可能包含多个以 <strong>0x30 0x31 0x63 0x64</strong> 开头的数据，对应文档中的帧头标识。有没有可能在负载数据中也出现帧头呢，那就再往后取一个字节，降低概率。可以观察到第4至第5字节，都是 <strong>0x81</strong> .具体含义可以看 <strong>RFC 3550</strong>.每个RTP包除了前30字节（也有可能少于30）的数据描述外，就是媒体数据payload了。<br>接下来要做的是，从TCP数据中分离出每个RTP包。TCP是基于流式传输的（我真的很讨厌“粘包”这个词），每个data不一定以帧头开始，或者结束，而且中间可能包含多个RTP包。但是已经知道了帧头一定是 <strong>0x30 0x31 0x63 0x64 0x81</strong> , 所以可以用帧头来切分TCP数据。再将切分出来的RTP包传入到下一个函数中单独处理。这部分处理很简单，不再贴代码，需要注意的地方就是如何将两个TCP data中的RTP包数据组合再传入函数。<br>先假定现在是最理想的情况，即不需要考虑RTP包乱序，视频帧乱序的情况，以这种前提将payload存储下来看看能否正常播放。当然，上面的再取一个 <strong>0x81</strong> 也是在这种前提下考虑的。<br>接下来就是要分析RTP包的数据了。完全对照文档中的表19按字节读取即可。网络传输使用的是 <strong>大端模式</strong> ，nodejs中使用的函数主要为以下几个：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">buf.<span class="title function_">slice</span>([start[, end]])</span><br><span class="line">buf.<span class="title function_">readInt8</span>(offset)</span><br><span class="line">buf.<span class="title function_">readInt16BE</span>(offset)</span><br><span class="line">buf.<span class="title function_">readInt32BE</span>(offset)</span><br></pre></td></tr></table></figure>
+
+<p>解析完成后，可以看到当前RTP包所承载的数据信息。如包序号，SIM卡号，通道号，数据类型，分包标记等。原子包不做处理，分包需要将后续的包组合成一个数据。从第5字节中的数据可知，当前包负载中的媒体类型，解析后对应表12查得可知，音频格式为 <strong>G.726</strong>，视频格式为 <strong>H.264</strong>.不同设备的格式可能有所不同。将音频包和视频包分别存储为音频和视频文件，再使用软件播放验证前面解析程序的正确性。全部正确的话，这些文件都是可以正常播放的。<br>接下来就需要想办法如何把这些数据推流到音视频服务器了。服务器接收的格式为RTMP流，需要把从RTP分离出的媒体数据转化为RTMP流推到服务器。由于本人还不能直接用nodejs撸出一个转码和推流服务的程序出来，接下来的工作便交给了 <strong>FFmpeg</strong> 处理。<br>先来看一下如何处理视频数据，用FFmpeg将本地文件推送至RTMP服务器，查官方文档可知，得到下面的命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -loglevel panic \</span><br><span class="line">    -probesize 32 \</span><br><span class="line">    -re \</span><br><span class="line">    -r 16 \</span><br><span class="line">    -i localfile.h264 \</span><br><span class="line">    -c:v libx264 \</span><br><span class="line">    -preset ultrafast \</span><br><span class="line">    -tune zerolatency \</span><br><span class="line">    -profile:v baseline \</span><br><span class="line">    -f flv <span class="string">&quot;rtmp://xxx&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>上面这条语句不止能推送文件，还是最终的优化版。<br>解释一下部分选项：</p>
+<ul>
+<li>-loglevel panic 用于屏蔽ffmpeg的输出内容</li>
+<li>-probesize 32 用于降低ffmpeg转换延迟</li>
+<li>-r 16 设置帧率，需要与设备端一致，否则会出现播放速度太快的问题</li>
+<li>-f flv “” 输出rtmp链接，这里需要使用SIM卡号和通道号组合成特定链接</li>
+</ul>
+<p>有了这条命令，就该想办法如何把RTP中的payload输入到ffmpeg了。<br>ffmpeg支持从STDIN输入的数据，所以只需要将ffmpeg执行命令放入nodejs的child process子进程中，然后把payload数据写入该子进程的STDIN即可，代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; spawn &#125; = <span class="built_in">require</span>(<span class="string">&#x27;child_process&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">FFMPEG</span> = <span class="string">&#x27;/usr/bin/ffmpeg&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> cmds = [</span><br><span class="line">    <span class="string">&#x27;-loglevel&#x27;</span>, <span class="string">&#x27;panic&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-probesize&#x27;</span>, <span class="string">&#x27;32&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-re&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-r&#x27;</span>, <span class="string">&#x27;16&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-i&#x27;</span>, <span class="string">&#x27;-&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-c:v&#x27;</span>, <span class="string">&#x27;libx264&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-preset&#x27;</span>, <span class="string">&#x27;ultrafast&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-tune&#x27;</span>, <span class="string">&#x27;zerolatency&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-profile:v&#x27;</span>, <span class="string">&#x27;baseline&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-f&#x27;</span>, <span class="string">&#x27;flv&#x27;</span>,</span><br><span class="line">    rtmpUrl</span><br><span class="line">];</span><br><span class="line"><span class="keyword">var</span> child = <span class="title function_">spawn</span>(<span class="variable constant_">FFMPEG</span>, cmds);</span><br><span class="line">child.<span class="property">stdin</span>.<span class="title function_">write</span>(data);</span><br></pre></td></tr></table></figure>
+
+<p>区别在于，将本地文件的名称换成了 - .ffmpeg会在子进程中将payload数据转化成rtmp推流到服务器。完成这一部分的代码之后，可以先尝试着将数据推流到音视频服务器，然后找一个能在线看rtmp的网站进行测试。程序无误的情况下，可以看到直播数据。在单台设备全通道的情况下，可以做到延迟 <strong>2-3s</strong> .说明上面的“大胆”假设是正确的，一下子感觉轻松了不少:)</p>
+<p>再接下来需要进一步完善程序，如：</p>
+<ul>
+<li>设备收到停止视频推送指令后，需要关闭ffmpeg的子进程</li>
+<li>多设备，多通道情况下的ffmpeg子进程管理</li>
+</ul>
+<p>这就与1078协议开发无关了，考验写程序功底的时候到了，本文不再赘述。</p>
+<p>音频部分涉及到转码，留在与下一篇双向对讲功能一起说。</p>
+<h3 id="网页端"><a href="#网页端" class="headerlink" title="网页端"></a>网页端</h3><p>网页端无论是Flash还是H5的视频播放器有很多，翻翻文档API就可以查到如何播放指定链接的视频。如果音视频服务器不仅能提供rtmp流，还能提供flv流，网页播放的实现可以更加灵活。</p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>1078协议实时视频的开发，说难不难，说简单不简单。它难就难在网上的资料居然如此之少，完全需要靠自己摸索验证。而且在开发验证的过程中，很容易走弯路。开发完成后，回头再看，发现只是需要按文档读取数据而已，并没有涉及音视频领域更深一层的知识。<br>本文并没有完全使用nodejs进行转码和推送的实现，而是使用了ffmpeg作为子进程进行推流。恕本人学识有限，音视频知识的学习任重而道远，暂时只能以这样的“笨”方法实现功能需求。新的学习计划已提上日程，希望在以后的日子里能够进一步改进。</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/FFmpeg/" rel="tag">FFmpeg</a>, <a class="article-tag-none-link" href="/tags/JT1078/" rel="tag">JT1078</a>, <a class="article-tag-none-link" href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag">笔记</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2019/03/29/JT1078%E5%8D%8F%E8%AE%AE%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8F%8C%E5%90%91%E5%AF%B9%E8%AE%B2%E5%90%8E%E8%AE%B0/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          JT1078协议开发之双向对讲后记
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/12/31/2018%E9%83%BD%E5%81%9A%E4%BA%86%E4%BA%9B%E4%BB%80%E4%B9%88/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          2018都做了些什么
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

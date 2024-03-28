@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>关于拓展NodeMediaServer以支持JT1078 | catinsides.github.io</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="记录一些拓展过程中的想法.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于拓展NodeMediaServer以支持JT1078">
+<meta property="og:url" content="https://catinsides.github.io/2019/07/17/%E5%85%B3%E4%BA%8E%E6%8B%93%E5%B1%95NodeMediaServer%E4%BB%A5%E6%94%AF%E6%8C%81JT1078/index.html">
+<meta property="og:site_name" content="catinsides.github.io">
+<meta property="og:description" content="记录一些拓展过程中的想法.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-07-16T17:23:50.000Z">
+<meta property="article:modified_time" content="2024-03-28T02:14:10.000Z">
+<meta property="article:author" content="catinsides">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">catinsides.github.io</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Catinsides">Github</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-关于拓展NodeMediaServer以支持JT1078" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      关于拓展NodeMediaServer以支持JT1078
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2019-07-16T17:23:50.000Z" itemprop="datePublished">七月 17, 2019, 1:23 凌晨</time>
+
+          
+            × <span class="article-word-count">1.3k words</span>
+            
+            × <span class="article-time-to-read">4 minutes</span>
+            
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <h3 id="Jul-13-2019"><a href="#Jul-13-2019" class="headerlink" title="Jul. 13, 2019"></a>Jul. 13, 2019</h3><p>可能与最近几月坚持跑步有关，头脑突然灵活了很多。</p>
+<p>前几日闲来无事摸鱼时，突然就翻回到了NodeMediaServer（NMS）的代码。从服务启动，到视频的解析推流，大致三到四个文件，脉络清晰。NMS的文件结构给了我很大的启发。我突然就想到，完全可以按照NMS的结构，把JT1078的解析也整合进去。</p>
+<p>想到去年年底，第一次接触JT1078，视频拉流推流这些概念的时候，完全是一脸懵比。当时准备在NMS上改造，也是在视频推流之后，在NMS解析视频包的位置进行后续处理。甚至研究了一段时间的RTMP握手，由于设备推流不是RTMP协议，在代码里还要判断，如果是设备推流过来的，要跳过RTMP握手阶段，再推流出去。现在回想起来，甚是痛苦。好在现在知道了如何使用FFmpeg作为推流工具，使得这一功能实现。</p>
+<p>今日，我仿照NMS的结构，和前几篇文章提到的FFmpeg命令，主要以FFmpeg推流实现的JT1078解析代码推到了仓库里。明显这不是最优的方案。其中一个很大的问题就是一个通道就要启动三个子进程（视频，音频和合并音视频），一般每台设备会有六个通道，观看一个设备的视频直播时就要启动大量的FFmpeg，相当耗费资源。而且这些子进程管理起来比较麻烦，有可能随时某一个在收不到数据时的进程关闭，就会出现 <strong>EPIPE</strong> 错误。而我理想中的最佳方案并不是这样的。最初，我尝试将设备推流过来的视频和音频数据，分别使用NMS原代码中的RTMP封包函数处理，送到播放者的socket中去，但是并没有成功。尝试几轮，服务端没有报错，看起来成功了，但是播放端并没有数据。未找到原因在哪，就暂时转换思路，使用FFmpeg来实现了。</p>
+<p>后来又想到，直接使用NMS的封包函数是不行的。视频数据倒是不需要额外处理，音频数据是G7xx格式的，RTMP并不支持，所以需要转码。看来代码层面的封包和解码还需要研究一段时间。</p>
+<p>唉！现在是不能够用代码直接封装音视频包，只得使用FFmpeg命令。我要是懂得音视频解封装，还能吃这个亏？</p>
+<h3 id="Jul-16-2019"><a href="#Jul-16-2019" class="headerlink" title="Jul. 16, 2019"></a>Jul. 16, 2019</h3><p>今日，研究了一下FFmpeg的命令，想到可以使用两条输入流（视频和音频）转化成一条输出流（RTMP）的方式实现转码和推流。这样就能够不创造出上一方案中多出来的视频和音频子进程了。在将设备的视频和音频流数据，分别存储下来后，使用FFmpeg命令推流</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i test.264 -i test.mp3 -map 0:v -map 1:a -c:v copy -c:a copy -f flv rtmp://xxxx:1935/live/stream_xxxx</span><br></pre></td></tr></table></figure>
+
+<p>命令执行成功，证明了这种方案可能行。于是，我将代码改造为，先将数据缓存，然后使用FFmpeg推流。谁知，实际情况是，缓存数据太小，FFmpeg进程启动后，瞬间就完成了推流，然后关闭了进程。造成的现象就是程序完全没有在（持续）推流。如果FFmpeg随时都要启动的话，有可能会遇到，总将文件从头开始推流的问题。遂暂时搁置了这种方案。</p>
+<p>根据上一方案存在的问题，又想到了启动子进程后，可以使用写入 <strong>stdin</strong> 的方式，将数据写入FFmpeg的进程中。但是并没有找到NodeJs写入两条输入流到一个子进程中去的方法。就算是将视频流利用管道符串接到音频流的转码进程中，还是需要有两条输入流。看来这种方案暂时也不行了。</p>
+<p>无意中翻到了 <strong>fluent-ffmpeg</strong> 这个库，好像有支持两条输入流的接口，待有时间再测试。</p>
+<h3 id="Dec-31-2019"><a href="#Dec-31-2019" class="headerlink" title="Dec. 31, 2019"></a>Dec. 31, 2019</h3><p>万万没想到，在2020以前我能将上面的问题解决。 <del>先忘记fluent-ffmpeg这件事吧</del><br>注: <strong>以下内容适用于Linux系统</strong><br>解决方案仍然是，将视频和音频分流后存储为文件，不同的是文件类别为pipe文件，即命名管道文件(Named Pipe).它遵循先进先出原则(FIFO)，可以像普通文件一样管理。<br>可以使用以下命令创建管道文件:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkfifo /tmp/one.pipe</span><br><span class="line">$ mkfifo /tmp/two.pipe</span><br></pre></td></tr></table></figure>
+
+<p>然后将程序分离出的视频数据和音频数据像写文件一样写入即可，ffmpeg的进程则从这两个文件中读取数据，再转换成rtmp推流发送出去。<br>ffmpeg命令如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ffmpeg -loglevel panic -probesize 32 -re -r 16 -f h264 -i /tmp/one.pipe -f mp3 -i /tmp/two.pipe -map 0:v -map 1:a -c:v copy -c:a aac -strict -2 -preset ultrafast -tune zerolatency -f flv rtmp://xxxx:1935/live/stream_xxxx</span><br></pre></td></tr></table></figure>
+
+<p>读入的文件需要指定格式，如h264和mp3(在上一步中将g726转为了mp3).<br>具体代码实现见我此次提交 <a target="_blank" rel="noopener" href="https://github.com/Catinsides/Node-Media-Server/commit/17be2385e0bc00e4514c504035155d3703299947?diff=split">commit</a></p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag">笔记</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2024/03/28/Hello-Again/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Hello Again
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/03/29/JT1078%E5%8D%8F%E8%AE%AE%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8F%8C%E5%90%91%E5%AF%B9%E8%AE%B2%E5%90%8E%E8%AE%B0/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          JT1078协议开发之双向对讲后记
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

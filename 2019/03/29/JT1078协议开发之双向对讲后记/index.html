@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>JT1078协议开发之双向对讲后记 | catinsides.github.io</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="记录一下JT1078协议中双向对讲功能的开发流程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JT1078协议开发之双向对讲后记">
+<meta property="og:url" content="https://catinsides.github.io/2019/03/29/JT1078%E5%8D%8F%E8%AE%AE%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8F%8C%E5%90%91%E5%AF%B9%E8%AE%B2%E5%90%8E%E8%AE%B0/index.html">
+<meta property="og:site_name" content="catinsides.github.io">
+<meta property="og:description" content="记录一下JT1078协议中双向对讲功能的开发流程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-03-28T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-03-28T02:33:42.571Z">
+<meta property="article:author" content="catinsides">
+<meta property="article:tag" content="JT1078">
+<meta property="article:tag" content="FFmpeg">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">catinsides.github.io</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Catinsides">Github</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-JT1078协议开发之双向对讲后记" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      JT1078协议开发之双向对讲后记
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2019-03-28T16:00:00.000Z" itemprop="datePublished">三月 29, 2019, 12:00 凌晨</time>
+
+          
+            × <span class="article-word-count">1.9k words</span>
+            
+            × <span class="article-time-to-read">8 minutes</span>
+            
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>上一篇大致介绍了一下实时视频的开发流程，这一篇所要介绍的双向对讲算是上一篇内容的小进阶。由 JT&#x2F;T 1078协议（以下简称1078）中介绍可知，双向对讲的数据传输方式也是在 <strong>5.5.3</strong> 表19中定义的。下达双向对讲指令通过改变修改 <strong>0x9101</strong> 消息ID中的参数来实现，本篇不再赘述。功能实现思路与上一篇相同，使用 <strong>nodejs</strong> 和 <strong>FFmpeg</strong> 实现。测试系统环境为 <strong>Linux</strong> .</p>
+<h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><p>见上一篇</p>
+<h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><p>实时视频流程大致如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">participant 网页</span><br><span class="line">participant 服务器</span><br><span class="line">participant 设备</span><br><span class="line"></span><br><span class="line">网页 -&gt;&gt; 设备: 下达双向对讲指令</span><br><span class="line">设备 -&gt;&gt; 服务器: 推送音频数据</span><br><span class="line">服务器 -&gt;&gt; 网页: 转换音频格式推流至网页，并通知开启网页麦克风</span><br><span class="line">网页 -&gt;&gt; 服务器: 采集音频数据并推送</span><br><span class="line">服务器 -&gt;&gt; 设备: 将网页端音频转码，发送至设备</span><br></pre></td></tr></table></figure>
+
+<h3 id="网页采集音频"><a href="#网页采集音频" class="headerlink" title="网页采集音频"></a>网页采集音频</h3><p>浏览器利用麦克风采集麦克风的方法，网上的代码有很多，方法也是如出一辙。<br>下面直接贴出代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> leftchannel = [];</span><br><span class="line"><span class="keyword">var</span> rightchannel = [];</span><br><span class="line"><span class="keyword">var</span> recorder = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">var</span> recording = <span class="literal">false</span>;</span><br><span class="line"><span class="keyword">var</span> recordingLength = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">var</span> volume = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">var</span> audioInput = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">var</span> sampleRate = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">var</span> audioContext = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">var</span> context = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">var</span> outputElement = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;output&#x27;</span>);    <span class="comment">// 用于提示当前录音状态</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!navigator.<span class="property">getUserMedia</span>)</span><br><span class="line">    navigator.<span class="property">getUserMedia</span> = navigator.<span class="property">getUserMedia</span> || navigator.<span class="property">webkitGetUserMedia</span> ||</span><br><span class="line">        navigator.<span class="property">mozGetUserMedia</span> || navigator.<span class="property">msGetUserMedia</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (navigator.<span class="property">getUserMedia</span>) &#123;</span><br><span class="line">    navigator.<span class="title function_">getUserMedia</span>(&#123; <span class="attr">audio</span>: <span class="literal">true</span> &#125;, success, <span class="keyword">function</span> (<span class="params">e</span>) &#123;</span><br><span class="line">        <span class="title function_">alert</span>(<span class="string">&#x27;Error capturing audio.&#x27;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_">alert</span>(<span class="string">&#x27;getUserMedia not supported in this browser.&#x27;</span>);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">interleave</span>(<span class="params">leftChannel, rightChannel</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> length = leftChannel.<span class="property">length</span> + rightChannel.<span class="property">length</span>;</span><br><span class="line">    <span class="keyword">var</span> result = <span class="keyword">new</span> <span class="title class_">Float32Array</span>(length);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> inputIndex = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> index = <span class="number">0</span>; index &lt; length;) &#123;</span><br><span class="line">        result[index++] = leftChannel[inputIndex];</span><br><span class="line">        result[index++] = rightChannel[inputIndex];</span><br><span class="line">        inputIndex++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">mergeBuffers</span>(<span class="params">channelBuffer, recordingLength</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> result = <span class="keyword">new</span> <span class="title class_">Float32Array</span>(recordingLength);</span><br><span class="line">    <span class="keyword">var</span> offset = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">var</span> lng = channelBuffer.<span class="property">length</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; lng; i++) &#123;</span><br><span class="line">        <span class="keyword">var</span> buffer = channelBuffer[i];</span><br><span class="line">        result.<span class="title function_">set</span>(buffer, offset);</span><br><span class="line">        offset += buffer.<span class="property">length</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">writeUTFBytes</span>(<span class="params">view, offset, string</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> lng = string.<span class="property">length</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; lng; i++) &#123;</span><br><span class="line">        view.<span class="title function_">setUint8</span>(offset + i, string.<span class="title function_">charCodeAt</span>(i));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">success</span>(<span class="params">e</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Record Init Succcess!&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    audioContext = <span class="variable language_">window</span>.<span class="property">AudioContext</span> || <span class="variable language_">window</span>.<span class="property">webkitAudioContext</span>;</span><br><span class="line">    context = <span class="keyword">new</span> <span class="title function_">audioContext</span>();</span><br><span class="line">    sampleRate = context.<span class="property">sampleRate</span>;    <span class="comment">// 44100</span></span><br><span class="line">    volume = context.<span class="title function_">createGain</span>();</span><br><span class="line">    audioInput = context.<span class="title function_">createMediaStreamSource</span>(e);</span><br><span class="line"></span><br><span class="line">    audioInput.<span class="title function_">connect</span>(volume);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> bufferSize = <span class="number">2048</span>;</span><br><span class="line">    recorder = context.<span class="title function_">createScriptProcessor</span>(bufferSize, <span class="number">2</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    recorder.<span class="property">onaudioprocess</span> = <span class="keyword">function</span> (<span class="params">e</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!recording) <span class="keyword">return</span>;</span><br><span class="line">        <span class="keyword">var</span> left = e.<span class="property">inputBuffer</span>.<span class="title function_">getChannelData</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">var</span> right = e.<span class="property">inputBuffer</span>.<span class="title function_">getChannelData</span>(<span class="number">1</span>);</span><br><span class="line">        leftchannel.<span class="title function_">push</span>(<span class="keyword">new</span> <span class="title class_">Float32Array</span>(left));</span><br><span class="line">        rightchannel.<span class="title function_">push</span>(<span class="keyword">new</span> <span class="title class_">Float32Array</span>(right));</span><br><span class="line">        recordingLength += bufferSize;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;recording...&#x27;</span>);</span><br><span class="line">        <span class="title function_">combineAudio</span>([<span class="keyword">new</span> <span class="title class_">Float32Array</span>(left)], [<span class="keyword">new</span> <span class="title class_">Float32Array</span>(right)], bufferSize, sampleRate);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    volume.<span class="title function_">connect</span>(recorder);</span><br><span class="line">    recorder.<span class="title function_">connect</span>(context.<span class="property">destination</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">combineAudio</span>(<span class="params">leftc, rightc, bfSize, sampleRate</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> leftBuffer = <span class="title function_">mergeBuffers</span>(leftc, bfSize);</span><br><span class="line">    <span class="keyword">var</span> rightBuffer = <span class="title function_">mergeBuffers</span>(rightc, bfSize);</span><br><span class="line">    <span class="keyword">var</span> interleaved = <span class="title function_">interleave</span>(leftBuffer, rightBuffer);</span><br><span class="line">    <span class="keyword">var</span> dataLen = interleaved.<span class="property">length</span> * <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">var</span> buffer, view, index = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    buffer = <span class="keyword">new</span> <span class="title class_">ArrayBuffer</span>(dataLen);    </span><br><span class="line">    view = <span class="keyword">new</span> <span class="title class_">DataView</span>(buffer);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> lng = interleaved.<span class="property">length</span>;</span><br><span class="line">    <span class="keyword">var</span> volume = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; lng; i++) &#123;</span><br><span class="line">        view.<span class="title function_">setInt16</span>(index, interleaved[i] * (<span class="number">0x7FFF</span> * volume), <span class="literal">true</span>);</span><br><span class="line">        index += <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> blob = <span class="keyword">new</span> <span class="title class_">Blob</span>([view], &#123; <span class="attr">type</span>: <span class="string">&#x27;audio/wave&#x27;</span> &#125;);    <span class="comment">// 最终音频数据</span></span><br><span class="line">    <span class="comment">// 将blob写入 websocket, 略</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码主要思路为通过改变全局变量 <strong>recording</strong> 控制录音，这个可以使用 <strong>button</strong> 元素实现。开启录音后，浏览器采集左右声道的音频数据，将数据存入Buffer后，合并两通道数据然后通过 <strong>DataView</strong> 和 <strong>Blob</strong> 包装后的数据发送至服务器。为了保证实时性，我这里使用的是 <strong>websocket</strong> 发送至后台。上述代码得到的音频数据为 <strong>PCMS16LE</strong> 原始数据，默认采样率为44.1k，所以体积比较巨大。可以通过减少声道数量和降低采样率，或者直接在浏览器端重新编码来减少体积。</p>
+<h3 id="音频转码"><a href="#音频转码" class="headerlink" title="音频转码"></a>音频转码</h3><p>音频转码涉及两个部分，一是将网页端采集的音频数据转换成设备支持的格式发送给设备；二是将设备端发送的音频数据转成网页端支持的格式进行播放。<br>设备支持什么格式呢？由于设备的不同，可能初始默认的音频格式都不尽相同。最方便的肯定是直接操作设备进行查看了。还可以在下达双向对讲指令后，解析RTP包参照1078 <strong>表12</strong> 进行查看。我手里这台设备的音频格式是 <strong>G726LE</strong>.<br>首先进行网页端播放设备音频流的实现。有了上一篇文章的经验，音视频服务器和网页端播放器都是准备好的，一下子省去了很多的工作，只需要将设备音频数据转码发送给音视频服务器即可。然后，网页端从音视频服务器提供的地址拉流就能进行播放了。看起来很简单有木有，突然有点小兴奋。<br>接下来的思路与视频处理相似，使用子进程开启 <strong>FFmpeg</strong> 进行转码并推流。由于推流要使用 <strong>flv</strong> 格式的 <strong>RTMP</strong> 流，而 <strong>flv</strong> 支持的音频格式是有限的（<a target="_blank" rel="noopener" href="https://trac.ffmpeg.org/wiki/SupportedMediaTypesInFormats">点击查看</a>），光是进行音频转码就占用了一个FFmpeg子进程，所以还需要另一个进程将转码后的数据推流出去。听起来很麻烦，但FFmpeg支持数据流处理，所以实现起来非常简单，只需要将两个子进程的STDIN, STDOUT pipe 起来就行了，代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; spawn &#125; = <span class="built_in">require</span>(<span class="string">&#x27;child_process&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">FFMPEG</span> = <span class="string">&#x27;/usr/bin/ffmpeg&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> cmds1 = [</span><br><span class="line">    <span class="string">&#x27;-loglevel&#x27;</span>, <span class="string">&#x27;panic&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-probesize&#x27;</span>, <span class="string">&#x27;32&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-f&#x27;</span>, <span class="string">&#x27;g726le&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-code_size&#x27;</span>, <span class="string">&#x27;5&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-ar&#x27;</span>, <span class="string">&#x27;8000&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-ac&#x27;</span>, <span class="string">&#x27;1&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-i&#x27;</span>, <span class="string">&#x27;-&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-ar&#x27;</span>, <span class="string">&#x27;44100&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-acodec&#x27;</span>, <span class="string">&#x27;libmp3lame&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-f&#x27;</span>, <span class="string">&#x27;mp3&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;pipe:1&#x27;</span></span><br><span class="line">];</span><br><span class="line"><span class="keyword">var</span> cmds2 = [</span><br><span class="line">    <span class="string">&#x27;-i&#x27;</span>, <span class="string">&#x27;-&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-vn&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-c&#x27;</span>, <span class="string">&#x27;copy&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-f&#x27;</span>, <span class="string">&#x27;flv&#x27;</span>,</span><br><span class="line">    rtmpUrl</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> child1 = <span class="title function_">spawn</span>(<span class="variable constant_">FFMPEG</span>, cmds1);</span><br><span class="line"><span class="keyword">var</span> child2 = <span class="title function_">spawn</span>(<span class="variable constant_">FFMPEG</span>, cmds2);</span><br><span class="line"></span><br><span class="line">child1.<span class="property">stdin</span>.<span class="title function_">write</span>(data);</span><br><span class="line">child1.<span class="property">stdout</span>.<span class="title function_">pipe</span>(child2.<span class="property">stdin</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这样，网页端播放器就能使用 <strong>RTMP</strong> 链接播放设备的音频数据了。<br>回来处理网页端到设备端的部分，思路也清晰了起来，只需将音频数据写到设备就行了。已经知道了设备支持的编码格式是 <strong>G726LE</strong>，所以首先需要将音频转码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; spawn &#125; = <span class="built_in">require</span>(<span class="string">&#x27;child_process&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">FFMPEG</span> = <span class="string">&#x27;/usr/bin/ffmpeg&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> cmds = [</span><br><span class="line">    <span class="string">&#x27;-loglevel&#x27;</span>, <span class="string">&#x27;panic&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-f&#x27;</span>, <span class="string">&#x27;s16le&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-ar&#x27;</span>, <span class="string">&#x27;44.1k&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-ac&#x27;</span>, <span class="string">&#x27;2&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-i&#x27;</span>, <span class="string">&#x27;-&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-acodec&#x27;</span>, <span class="string">&#x27;g726le&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-code_size&#x27;</span>, <span class="string">&#x27;5&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-ar&#x27;</span>, <span class="string">&#x27;8k&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-ac&#x27;</span>, <span class="string">&#x27;1&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;-f&#x27;</span>, <span class="string">&#x27;g726le&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;pipe:1&#x27;</span></span><br><span class="line">];</span><br><span class="line"><span class="keyword">var</span> _process = <span class="title function_">spawn</span>(<span class="variable constant_">FFMPEG</span>, cmds);</span><br></pre></td></tr></table></figure>
+
+<p>开启子进程后，将网页端数据写入进程STDIN，再将STDOUT数据写入设备连至服务器的TCP连接即可。因为流程中，是先下达指令，设备连接上来后，再进行网页端数据写入，设备的连接是很容易获取到的。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>实时视频和双向对讲的实现思路大体上是一致，区别在FFmpeg的参数不同，多开启了几个进程而已。不由得感叹FFmpeg的强大。前后两篇文章中，涉及到业务的代码都是一笔带过，而主要列举了FFmpeg的命令。不要小看这简单的几行命令，对于从没接触过FFmpeg和音视频知识几乎为零的我来说，花费了大量的时间来搜索和尝试。相比之下，业务上码代码花费的时间更少。业务代码中也有很多值得注意的点，如设备连接和断开时，FFmpeg进程的管理；FFmpeg进程写入时，EPIPE的处理（管理各个子进程的事件回调）；双向对讲状态的共享（Redis实现）等等。经过这一项目的一番折腾，也算是了解一些音视频方面的知识，也对这方面有了一番兴趣。打算借着没有减退的热度开个音视频相关的小项目，希望自己不要弃坑。</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/FFmpeg/" rel="tag">FFmpeg</a>, <a class="article-tag-none-link" href="/tags/JT1078/" rel="tag">JT1078</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2019/07/17/%E5%85%B3%E4%BA%8E%E6%8B%93%E5%B1%95NodeMediaServer%E4%BB%A5%E6%94%AF%E6%8C%81JT1078/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          关于拓展NodeMediaServer以支持JT1078
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/03/16/JT1078%E5%8D%8F%E8%AE%AE%E5%BC%80%E5%8F%91%E4%B9%8B%E5%AE%9E%E6%97%B6%E8%A7%86%E9%A2%91%E5%90%8E%E8%AE%B0/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          JT1078协议开发之实时视频后记
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Threejs读取STL文件 | catinsides.github.io</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="Threejs是使用JavaScript编写的，运行在浏览器中的3D引擎。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Threejs读取STL文件">
+<meta property="og:url" content="https://catinsides.github.io/2016/11/26/Threejs%E8%AF%BB%E5%8F%96STL%E6%96%87%E4%BB%B6/index.html">
+<meta property="og:site_name" content="catinsides.github.io">
+<meta property="og:description" content="Threejs是使用JavaScript编写的，运行在浏览器中的3D引擎。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-11-26T09:42:46.000Z">
+<meta property="article:modified_time" content="2024-03-28T02:37:39.117Z">
+<meta property="article:author" content="catinsides">
+<meta property="article:tag" content="Hello world">
+<meta property="article:tag" content="Javascript">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">catinsides.github.io</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Catinsides">Github</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-Threejs读取STL文件" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      Threejs读取STL文件
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2016-11-26T09:42:46.000Z" itemprop="datePublished">十一月 26, 2016, 5:42 下午</time>
+
+          
+            × <span class="article-word-count">1.2k words</span>
+            
+            × <span class="article-time-to-read">4 minutes</span>
+            
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>Threejs是使用JavaScript编写的，运行在浏览器中的3D引擎。</p>
+</blockquote>
+<p>　　当初想在我的小项目中添加三维模型展示的功能，于是找到了这个js编写的第三方库。它可以方便的读取图形文件加载到浏览器中，并且提供各式小工具完成交互功能。<br>　　我在工作中使用的三维软件是Solidworks，可以方便的导出STL格式的文件，这也是通常在3D打印中使用的格式。百度上搜到的threejs教程比较丰富，然而偏偏没有读取STL文件的方法。官方文档中提供了各种Loaders用于加载各种格式的图形文件，然而偏偏也没有读取STL文件的方法……<br>　　最终神奇的在官方提供的代码包中(<a target="_blank" rel="noopener" href="https://github.com/mrdoob/three.js" title="github">github</a>),找到了示例代码。分析代码，结合官方文档生肉，功夫不负有心人，总算是把生肉炒成了熟肉。<br>　　Talk is cheap,show me the code.</p>
+<h3 id="添加画布"><a href="#添加画布" class="headerlink" title="添加画布"></a>添加画布</h3><p>其实就是在<code>&lt;body&gt;</code>标签内添加一个<code>&lt;div&gt;</code>,如下</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;output&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这个区域就是即将插入三维模型的地方，添加id属性方便获取。</p>
+<h3 id="Threejs"><a href="#Threejs" class="headerlink" title="Threejs"></a>Threejs</h3><p>本代码中的功能需要引入官方包中的three.min.js, STLLoader.js和OrbitControls.js.</p>
+<h4 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h4><p>初始化场景类</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scene = <span class="keyword">new</span> <span class="variable constant_">THREE</span>.<span class="title class_">Scene</span>();</span><br></pre></td></tr></table></figure>
+<p>为了便于观察，在场景中放置一个三坐标</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> axes = <span class="keyword">new</span> <span class="variable constant_">THREE</span>.<span class="title class_">AxisHelper</span>(<span class="number">20</span>);</span><br><span class="line">scene.<span class="title function_">add</span>(axes);</span><br></pre></td></tr></table></figure>
+<p>需要在场景添加其他物件时，使用scene.add()即可，就是这么简单~</p>
+<h4 id="照相机"><a href="#照相机" class="headerlink" title="照相机"></a>照相机</h4><p>这里的照相机可不是生活中的指示代词，而是图形学中一种抽象概念。它定义了三维空间到二维屏幕的投影方式，照相机又分为正交投影照相机和透视投影照相机。本代码中使用的是透视投影照相机，至于为什么使用这个方式，有兴趣的同学可以wiki两种照相机的区别。<br>初始化照相机</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> camera = <span class="keyword">new</span> <span class="variable constant_">THREE</span>.<span class="title class_">PerspectiveCamera</span>(<span class="number">45</span>, <span class="variable language_">window</span>.<span class="property">innerWidth</span> / <span class="variable language_">window</span>.<span class="property">innerHeight</span>, <span class="number">0.1</span>, <span class="number">1000</span>);</span><br><span class="line">camera.<span class="property">position</span>.<span class="property">x</span> = <span class="number">150</span>;</span><br><span class="line">camera.<span class="property">position</span>.<span class="property">y</span> = <span class="number">50</span>;</span><br><span class="line">camera.<span class="property">position</span>.<span class="property">z</span> = <span class="number">150</span>;</span><br><span class="line">camera.<span class="title function_">lookAt</span>(scene.<span class="property">position</span>);</span><br></pre></td></tr></table></figure>
+
+<p>第一部分，PerspectiveCamera()接收四个参数：</p>
+<ul>
+<li>45，为照相机竖直方向张角（角度制）；</li>
+<li>window.innerWidth &#x2F; window.innerHeight,照相机水平与竖直方向长度的比值，取三维模型渲染区域的横纵比例；</li>
+<li>0.1, 1000，最近点和最远点。</li>
+</ul>
+<p>这些参数决定模型投影的形状与大小，一般情况下默认即可。</p>
+<p>第二部分，设定照相机的位置，这些数值可根据模型大小进行调整。<br>第三部分，使照相机指向原点。</p>
+<h4 id="读取与渲染"><a href="#读取与渲染" class="headerlink" title="读取与渲染"></a>读取与渲染</h4><p>初始化类</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> webGLRenderer = <span class="keyword">new</span> <span class="variable constant_">THREE</span>.<span class="title class_">WebGLRenderer</span>();</span><br></pre></td></tr></table></figure>
+<p>设定背景颜色与范围，并将渲染结果插入到页面中</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">webGLRenderer.<span class="title function_">setClearColor</span>(<span class="number">0xEEEEEE</span>);</span><br><span class="line">webGLRenderer.<span class="title function_">setSize</span>(<span class="variable language_">window</span>.<span class="property">innerWidth</span>, <span class="variable language_">window</span>.<span class="property">innerHeight</span>);</span><br><span class="line"><span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;output&quot;</span>).<span class="title function_">appendChild</span>(webGLRenderer.<span class="property">domElement</span>);</span><br></pre></td></tr></table></figure>
+<p>初始化类，并读取模型文件</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> loader = <span class="keyword">new</span> <span class="variable constant_">THREE</span>.<span class="title class_">STLLoader</span>();</span><br><span class="line">loader.<span class="title function_">load</span>(<span class="string">&quot;sample.stl&quot;</span>, <span class="keyword">function</span> (<span class="params">geometry</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> mat = <span class="keyword">new</span> <span class="variable constant_">THREE</span>.<span class="title class_">MeshNormalMaterial</span>();</span><br><span class="line">    mesh = <span class="keyword">new</span> <span class="variable constant_">THREE</span>.<span class="title class_">Mesh</span>(geometry, mat);</span><br><span class="line">    mesh.<span class="property">scale</span>.<span class="title function_">set</span>(<span class="number">0.3</span>, <span class="number">0.3</span>, <span class="number">0.3</span>);</span><br><span class="line">    scene.<span class="title function_">add</span>(mesh);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在匿名函数中，使用了内置的MeshNormalMaterial()材质，颜色分明便于观察。设定材质参数，添加到场景中。</p>
+<h4 id="交互"><a href="#交互" class="headerlink" title="交互"></a>交互</h4><p>既然是浏览三维模型，所以模型必须能够随心所欲的从各个角度观看。<br>所以浏览器中的模型必须能够使用鼠标转动。官方包中提供了这一功能。<br>首先，初始化类</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">controls = <span class="keyword">new</span> <span class="variable constant_">THREE</span>.<span class="title class_">OrbitControls</span>( camera, webGLRenderer.<span class="property">domElement</span> );</span><br><span class="line">controls.<span class="property">enableDamping</span> = <span class="literal">true</span>;</span><br><span class="line">controls.<span class="property">dampingFactor</span> = <span class="number">0.25</span>;</span><br><span class="line">controls.<span class="property">enableZoom</span> = <span class="literal">true</span>;</span><br></pre></td></tr></table></figure>
+<p>其实每转动一次，浏览器都在重新绘制模型，所以参数中引入了照相机与渲染类。<br>下面几个语句是使能拖动和缩放，默认即可。</p>
+<p><b>这里是重点！</b><br>以上代码都完成后，我发现模型在浏览器中并不能动！<br>为什么不动呢？这曾经是困扰了我很长时间的问题。<br>经过各种的google和stackoverflow后，我才找到了解决方法！<br>那就是requestAnimationFrame ()，通过递归调用更新画面，使画面动起来。<br>直接上代码</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">render</span>();</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">render</span>(<span class="params"></span>) &#123;</span><br><span class="line">            <span class="title function_">requestAnimationFrame</span>(render);</span><br><span class="line">            controls.<span class="title function_">update</span>();</span><br><span class="line">            webGLRenderer.<span class="title function_">render</span>(scene, camera);</span><br><span class="line">       &#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码完成，全部代码以及预览效果可以到我的Repositories中查看。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>　　通过以上配置就可以将STL图形插入到网页中去了，并且可以使用鼠标拖动和缩放。<br>代码中的<code>&lt;div id=&quot;output&quot;&gt;</code>可以任意大小，任意位置。STL文件在网上能够搜到各种各样的模型，替换代码中的文件名即可。<br>　　如果想自己制作STL文件，推荐软件SketchUp.<br>　　在使用chrome浏览器时，会提示跨域错误，不能加载模型。此时右击浏览器图标-&gt;属性，在属性目标后（引号外）添加 –allow-file-access-from-files.<br>　　FireFox无此问题。</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/Hello-world/" rel="tag">Hello world</a>, <a class="article-tag-none-link" href="/tags/Javascript/" rel="tag">Javascript</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2016/11/26/CodeIgniter-%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          CodeIgniter 简单入门
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/11/25/THINKPHP-%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          THINKPHP 简单入门
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

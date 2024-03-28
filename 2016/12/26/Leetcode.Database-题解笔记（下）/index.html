@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Leetcode.Database 题解笔记（下） | catinsides.github.io</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="这篇文章承接上一篇，将Leetcode.Database中的后6道题的解法及笔记记录下来。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Leetcode.Database 题解笔记（下）">
+<meta property="og:url" content="https://catinsides.github.io/2016/12/26/Leetcode.Database-%E9%A2%98%E8%A7%A3%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%8B%EF%BC%89/index.html">
+<meta property="og:site_name" content="catinsides.github.io">
+<meta property="og:description" content="这篇文章承接上一篇，将Leetcode.Database中的后6道题的解法及笔记记录下来。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-12-26T07:55:44.000Z">
+<meta property="article:modified_time" content="2024-03-28T02:34:32.174Z">
+<meta property="article:author" content="catinsides">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">catinsides.github.io</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Catinsides">Github</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-Leetcode.Database-题解笔记（下）" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      Leetcode.Database 题解笔记（下）
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2016-12-26T07:55:44.000Z" itemprop="datePublished">十二月 26, 2016, 3:55 下午</time>
+
+          
+            × <span class="article-word-count">1.1k words</span>
+            
+            × <span class="article-time-to-read">4 minutes</span>
+            
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>Leetcode是一个在线编程网站，收录了算法，数据库等各种题目。同样有很多优秀的算法解法，能够有效的提高姿势水平。</p>
+</blockquote>
+<p>这篇文章承接上一篇，将Leetcode.Database中的后6道题的解法及笔记记录下来。</p>
+<h3 id="183-Customers-Who-Never-Order"><a href="#183-Customers-Who-Never-Order" class="headerlink" title="183.Customers Who Never Order"></a>183.<a target="_blank" rel="noopener" href="https://leetcode.com/problems/customers-who-never-order/">Customers Who Never Order</a></h3><p>题目要求为查找出没有订单的客户。<br>解题思路为使用子查询和NOT IN.</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> Name <span class="keyword">AS</span> Customers </span><br><span class="line"><span class="keyword">FROM</span> Customers c </span><br><span class="line"><span class="keyword">WHERE</span> c.id </span><br><span class="line"><span class="keyword">NOT</span> <span class="keyword">IN</span> </span><br><span class="line">    (<span class="keyword">SELECT</span> CustomerId <span class="keyword">FROM</span> Orders);</span><br></pre></td></tr></table></figure>
+<p>这里需要注意的是要在NAME后添加<code>AS Customers</code>.</p>
+<h3 id="184-Department-Highest-Salary"><a href="#184-Department-Highest-Salary" class="headerlink" title="184.Department Highest Salary"></a>184.<a target="_blank" rel="noopener" href="https://leetcode.com/problems/department-highest-salary/">Department Highest Salary</a></h3><p>题目要求为联合员工表和部门表并从中查找出收入最高的员工。<br>解题思路为使用正确的子查询和过滤条件，</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> d.Name <span class="keyword">AS</span> Department, e.Name <span class="keyword">AS</span> Employee, t.Salary </span><br><span class="line"><span class="keyword">FROM</span> Employee e </span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> </span><br><span class="line">    (<span class="keyword">SELECT</span> DepartmentId, <span class="built_in">MAX</span>(Salary) <span class="keyword">AS</span> Salary </span><br><span class="line">     <span class="keyword">FROM</span> Employee </span><br><span class="line">     <span class="keyword">GROUP</span> <span class="keyword">BY</span> DepartmentId) t</span><br><span class="line"><span class="keyword">USING</span> (DepartmentId, Salary)</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> Department d</span><br><span class="line"><span class="keyword">ON</span> d.id <span class="operator">=</span> t.DepartmentId</span><br></pre></td></tr></table></figure>
+<p>这里最容易混淆的是SQL语句的执行顺序，简单做个笔记：<br>SQL语句执行时，每个步骤都会产生一个虚拟表用于下一步骤的输入，虚拟表对外不可用，只会将最终的查询结果返回。如果查询语句中没有某一个子句，则会跳过。<br>顺序结构如下，小括号内为执行次序：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">8</span>) <span class="keyword">SELECT</span> (<span class="number">9</span>)<span class="keyword">DISTINCT</span>  (<span class="number">11</span>)<span class="operator">&lt;</span>Top Num<span class="operator">&gt;</span> <span class="operator">&lt;</span><span class="keyword">select</span> list<span class="operator">&gt;</span></span><br><span class="line">(<span class="number">1</span>) <span class="keyword">FROM</span> [left_table]</span><br><span class="line">(<span class="number">3</span>) <span class="operator">&lt;</span>join_type<span class="operator">&gt;</span> <span class="keyword">JOIN</span> <span class="operator">&lt;</span>right_table<span class="operator">&gt;</span></span><br><span class="line">(<span class="number">2</span>) <span class="keyword">ON</span> <span class="operator">&lt;</span>join_condition<span class="operator">&gt;</span></span><br><span class="line">(<span class="number">4</span>) <span class="keyword">WHERE</span> <span class="operator">&lt;</span>where_condition<span class="operator">&gt;</span></span><br><span class="line">(<span class="number">5</span>) <span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="operator">&lt;</span>group_by_list<span class="operator">&gt;</span></span><br><span class="line">(<span class="number">6</span>) <span class="keyword">WITH</span> <span class="operator">&lt;</span><span class="keyword">CUBE</span> <span class="operator">|</span> <span class="keyword">RollUP</span><span class="operator">&gt;</span></span><br><span class="line">(<span class="number">7</span>) <span class="keyword">HAVING</span> <span class="operator">&lt;</span>having_condition<span class="operator">&gt;</span></span><br><span class="line">(<span class="number">10</span>)<span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="operator">&lt;</span>order_by_list<span class="operator">&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="185-Department-Top-Three-Salaries"><a href="#185-Department-Top-Three-Salaries" class="headerlink" title="185.Department Top Three Salaries"></a>185.<a target="_blank" rel="noopener" href="https://leetcode.com/problems/department-top-three-salaries/">Department Top Three Salaries</a></h3><p>题目要求为查询每个部门前三名收入最高的员工。<br>解题思路，首先复制Employee表e1，原表为e，在同一部门内选一人与其他员工薪水进行比较，将大于此人的人员数量计数。如果数量为0，则此人为薪水最高者；数量为1，则为第二高者；以此类推……将数量小于3（前三名）的员工，再与部门表做INNER JOIN，最终得出结果。<br>查询语句如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> d.Name <span class="keyword">AS</span> Department, e.Name <span class="keyword">AS</span> Employee, e.Salary <span class="keyword">AS</span> Salary  </span><br><span class="line"><span class="keyword">FROM</span> Employee e </span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> Department d </span><br><span class="line"><span class="keyword">ON</span> e.DepartmentId <span class="operator">=</span> d.Id  </span><br><span class="line"><span class="keyword">WHERE</span> <span class="number">3</span> <span class="operator">&gt;</span> </span><br><span class="line">    (</span><br><span class="line">    <span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="keyword">DISTINCT</span> e1.Salary)  </span><br><span class="line">    <span class="keyword">FROM</span> Employee e1  </span><br><span class="line">    <span class="keyword">WHERE</span> e1.Salary <span class="operator">&gt;</span> e.Salary  </span><br><span class="line">    <span class="keyword">AND</span> e1.DepartmentId <span class="operator">=</span> e.DepartmentId</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<p>这道题查询方式很巧妙，需要注意的是将查询方法实践到语句中，同时注意SQL语句的执行顺序。</p>
+<h3 id="186-Delete-Duplicate-Emails"><a href="#186-Delete-Duplicate-Emails" class="headerlink" title="186.Delete Duplicate Emails"></a>186.<a target="_blank" rel="noopener" href="https://leetcode.com/problems/delete-duplicate-emails/">Delete Duplicate Emails</a></h3><p>题目要求为删除重复的Email.<br>解题思路为复制临时表，取两者交集，删除掉Email相同Id不同的行（取大于小于皆可）。<br>查询语句如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DELETE</span> p1 </span><br><span class="line"><span class="keyword">FROM</span> Person p1 </span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> Person p2</span><br><span class="line"><span class="keyword">WHERE</span> p1.Email <span class="operator">=</span> p2.Email <span class="keyword">AND</span> p1.Id <span class="operator">&gt;</span> p2.Id;</span><br></pre></td></tr></table></figure>
+
+<h3 id="197-Rising-Temperature"><a href="#197-Rising-Temperature" class="headerlink" title="197.Rising Temperature"></a>197.<a target="_blank" rel="noopener" href="https://leetcode.com/problems/rising-temperature/">Rising Temperature</a></h3><p>题目要求为查询所有当天温度比前一天高的日期的Id.<br>解题思路，首先用MySQL内置函数TO_DAYS()将日期转为天数，再使用错位比较（同180）找出温度大于前一天的日期，最后取交集。<br>查询语句如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> w1.Id </span><br><span class="line"><span class="keyword">FROM</span> Weather w1 </span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> Weather w2</span><br><span class="line"><span class="keyword">ON</span> TO_DAYS(w1.Date) <span class="operator">=</span> TO_DAYS(w2.Date) <span class="operator">+</span> <span class="number">1</span> </span><br><span class="line"><span class="keyword">AND</span> w1.Temperature <span class="operator">&gt;</span> w2.Temperature;</span><br></pre></td></tr></table></figure>
+
+<h3 id="262-Trips-and-Users"><a href="#262-Trips-and-Users" class="headerlink" title="262.Trips and Users"></a>262.<a target="_blank" rel="noopener" href="https://leetcode.com/problems/trips-and-users/">Trips and Users</a></h3><p>最后一道题，看起来就像压轴题……<br>题目要求为查询出Oct 1,2013至Oct 3,2013之间，非禁止用户的请求撤销率。<br>解题思路为根据要求链接两表，设置好过滤条件，再将结果计算后返回。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    t.Request_at <span class="keyword">AS</span> `<span class="keyword">Day</span>`, </span><br><span class="line">    ROUND(</span><br><span class="line">        <span class="built_in">SUM</span>(</span><br><span class="line">            IF(t.Status <span class="operator">=</span> <span class="string">&#x27;completed&#x27;</span>, <span class="number">0</span>, <span class="number">1</span>)</span><br><span class="line">           ) <span class="operator">/</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>),  <span class="number">2</span>) </span><br><span class="line">        <span class="keyword">AS</span> `Cancellation Rate` </span><br><span class="line"><span class="keyword">FROM</span> Trips t </span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> Users u </span><br><span class="line"><span class="keyword">ON</span> t.Client_Id <span class="operator">=</span> u.Users_Id </span><br><span class="line"><span class="keyword">WHERE</span> t.Request_at </span><br><span class="line"><span class="keyword">BETWEEN</span> <span class="string">&#x27;2013-10-01&#x27;</span> <span class="keyword">AND</span> <span class="string">&#x27;2013-10-03&#x27;</span> </span><br><span class="line"><span class="keyword">AND</span> u.Banned <span class="operator">=</span> <span class="string">&#x27;No&#x27;</span> <span class="keyword">AND</span> u.Role <span class="operator">=</span> <span class="string">&#x27;client&#x27;</span> </span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> t.Request_at </span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> t.Request_at;</span><br></pre></td></tr></table></figure>
+<p>通过之前的解题，理解这段查询语句的逻辑不难。这里仅把前面没提到过的内置函数做下笔记：</p>
+<ul>
+<li><code>ROUND()</code>为四舍五入函数，第二个参数为小数位保留的位数；</li>
+<li><code>SUM()</code>顾名思义为求和函数；</li>
+<li><code>IF()</code>,格式为IF(Condition,A,B)，当Condition为TRUE时，返回A；当Condition为FALSE时，返回B。</li>
+</ul>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>至此，Leetcode所有Database题目完成（撒花）。总的来看，这些题目锻炼了使用SQL的基本功，同时提供了思考问题的新思路，这在以后的工作中都很有帮助。同时在每页的Discuss中，查看其它网友的解法，能够进一步提高姿势水平。将这些解题的思路整理成两篇文章，也是一个不小的收获。</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/MySQL/" rel="tag">MySQL</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2017/01/26/%E5%A6%82%E4%BD%95%E7%BC%96%E5%86%99%E8%87%AA%E5%B7%B1%E7%9A%84MVC%E6%A1%86%E6%9E%B6/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          如何编写自己的MVC框架
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/12/26/Leetcode.Database-%E9%A2%98%E8%A7%A3%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%8A%EF%BC%89/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          Leetcode.Database 题解笔记（上）
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>
