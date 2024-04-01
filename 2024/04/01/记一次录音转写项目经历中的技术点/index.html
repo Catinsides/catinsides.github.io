@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>记一次录音转写项目经历中的技术点 | catinsides.github.io</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="记一次录音转写项目经历中的技术点最近做了一个录音转写的项目，其中有一些自认为有意思的技术点，在此记录一下。 实时通话中的录音推流此次项目中的部分场景是，坐席与客户通话时，要将通话的内容在网页端进行展示。如果是通话完成后，将对话内容展示出来，可以直接参照 Azure 的官方教程中的示例，链接。教程中，默认的方法就是将整个文件推送上去，无脑CV即可。   通话完成进行录音识别，语音转文字，可能会遇到的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次录音转写项目经历中的技术点">
+<meta property="og:url" content="https://catinsides.github.io/2024/04/01/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%BD%95%E9%9F%B3%E8%BD%AC%E5%86%99%E9%A1%B9%E7%9B%AE%E7%BB%8F%E5%8E%86%E4%B8%AD%E7%9A%84%E6%8A%80%E6%9C%AF%E7%82%B9/index.html">
+<meta property="og:site_name" content="catinsides.github.io">
+<meta property="og:description" content="记一次录音转写项目经历中的技术点最近做了一个录音转写的项目，其中有一些自认为有意思的技术点，在此记录一下。 实时通话中的录音推流此次项目中的部分场景是，坐席与客户通话时，要将通话的内容在网页端进行展示。如果是通话完成后，将对话内容展示出来，可以直接参照 Azure 的官方教程中的示例，链接。教程中，默认的方法就是将整个文件推送上去，无脑CV即可。   通话完成进行录音识别，语音转文字，可能会遇到的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-04-01T09:43:02.000Z">
+<meta property="article:modified_time" content="2024-04-01T09:43:57.807Z">
+<meta property="article:author" content="catinsides">
+<meta property="article:tag" content="Javascript">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">catinsides.github.io</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Catinsides">Github</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-记一次录音转写项目经历中的技术点" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      记一次录音转写项目经历中的技术点
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2024-04-01T09:43:02.000Z" itemprop="datePublished">四月 1, 2024, 5:43 下午</time>
+
+          
+            × <span class="article-word-count">1.4k words</span>
+            
+            × <span class="article-time-to-read">6 minutes</span>
+            
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <h1 id="记一次录音转写项目经历中的技术点"><a href="#记一次录音转写项目经历中的技术点" class="headerlink" title="记一次录音转写项目经历中的技术点"></a>记一次录音转写项目经历中的技术点</h1><p>最近做了一个录音转写的项目，其中有一些自认为有意思的技术点，在此记录一下。</p>
+<h2 id="实时通话中的录音推流"><a href="#实时通话中的录音推流" class="headerlink" title="实时通话中的录音推流"></a>实时通话中的录音推流</h2><p>此次项目中的部分场景是，坐席与客户通话时，要将通话的内容在网页端进行展示。如果是通话完成后，将对话内容展示出来，可以直接参照 Azure 的官方教程中的示例，<a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/get-started-speech-to-text?tabs=macos,terminal&pivots=programming-language-javascript">链接</a>。教程中，默认的方法就是将整个文件推送上去，无脑CV即可。  </p>
+<p>通话完成进行录音识别，语音转文字，可能会遇到的难点有：  </p>
+<h3 id="录音文件与转写服务不在同一个服务器"><a href="#录音文件与转写服务不在同一个服务器" class="headerlink" title="录音文件与转写服务不在同一个服务器"></a>录音文件与转写服务不在同一个服务器</h3><p>此时，需要在自身的服务端实现一个录音下载的 stream 接口。转写服务的客户端，调用这个接口之后，可以选择将文件暂存到本地，或者直接将下载流转到 azure 的转写客户端。关键代码如下：</p>
+<p>服务端接口：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取录音文件</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">getRecord</span> = (<span class="params">req, res</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; recordId &#125; = req.<span class="property">query</span>;</span><br><span class="line">  <span class="keyword">const</span> recordPath = path.<span class="title function_">resolve</span>(__dirname, <span class="string">&#x27;record&#x27;</span>, <span class="string">`<span class="subst">$&#123;recordId&#125;</span>.wav`</span>);</span><br><span class="line"></span><br><span class="line">  res.<span class="title function_">writeHead</span>(<span class="number">200</span>, &#123;</span><br><span class="line">    <span class="string">&#x27;Content-Type&#x27;</span>: <span class="string">&#x27;audio/wav&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;Content-Length&#x27;</span>: fs.<span class="title function_">statSync</span>(recordPath).<span class="property">size</span></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  fs.<span class="title function_">createReadStream</span>(recordPath).<span class="title function_">pipe</span>(res);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>转写服务客户端，同时要考虑到链接会被重定向，主要使用以下两个函数：  </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">sendGetRequest</span>(<span class="params">url, redirectTimes = <span class="number">0</span></span>) &#123;</span><br><span class="line">    redirectTimes += <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (redirectTimes &gt; <span class="number">10</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">reject</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">`HTTP request Redirects exceeded, <span class="subst">$&#123;redirectTimes&#125;</span>`</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> req = http.<span class="title function_">get</span>(url, &#123; <span class="attr">timeout</span>: <span class="number">3000</span> &#125;, <span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (res.<span class="property">statusCode</span> === <span class="number">302</span>) &#123;</span><br><span class="line">                <span class="keyword">const</span> redirectUrl = res.<span class="property">headers</span>.<span class="property">location</span>;</span><br><span class="line">                <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Received 302 Found, redirecting to:&#x27;</span>, redirectUrl);</span><br><span class="line">                <span class="keyword">return</span> <span class="title function_">resolve</span>(<span class="title function_">sendGetRequest</span>(redirectUrl));</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (res.<span class="property">statusCode</span> === <span class="number">200</span>) &#123;</span><br><span class="line">                <span class="title function_">resolve</span>(res);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="title function_">reject</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">`HTTP request failed with status code <span class="subst">$&#123;res.statusCode&#125;</span>`</span>));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        req.<span class="title function_">on</span>(<span class="string">&#x27;error&#x27;</span>, <span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="title function_">reject</span>(err);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">getRemoteFile</span>(<span class="params">file</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> url = <span class="keyword">new</span> <span class="title function_">URL</span>(<span class="string">`/some-api`</span>, host);</span><br><span class="line">    <span class="keyword">let</span> filePath = path.<span class="title function_">join</span>(__dirname, <span class="string">&#x27;暂存路径&#x27;</span>);</span><br><span class="line">    <span class="keyword">let</span> writeStream = fs.<span class="title function_">createWriteStream</span>(filePath);</span><br><span class="line">    <span class="keyword">let</span> stream = <span class="keyword">await</span> <span class="title function_">sendGetRequest</span>(url.<span class="title function_">toString</span>());</span><br><span class="line"></span><br><span class="line">    stream.<span class="title function_">pipe</span>(writeStream);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        writeStream.<span class="title function_">on</span>(<span class="string">&#x27;error&#x27;</span>, <span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">reject</span>(err);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        writeStream.<span class="title function_">on</span>(<span class="string">&#x27;close&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">resolve</span>(filePath);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照此<a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-recognize-speech?pivots=programming-language-javascript#recognize-speech-from-an-in-memory-stream">链接</a>中的方法，封装出一个接收文件输入流的转写函数 <code>readStreamPush</code>，将上面的文件流送入即可。  </p>
+<h3 id="录音文件增量读取"><a href="#录音文件增量读取" class="headerlink" title="录音文件增量读取"></a>录音文件增量读取</h3><p>因为是实时转写的，所以需要不断的读取在改变大小的文件。在node中，可以很方便的实现这一点。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> watcher = fs.<span class="title function_">watch</span>(file, <span class="function">(<span class="params">eventType, filename</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (eventType === <span class="string">&#x27;change&#x27;</span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">readIncrementalData</span>(file, <span class="function">(<span class="params">err, buffer, done</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (err) &#123;</span><br><span class="line">                <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;error&#x27;</span>, err);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (buffer) &#123;</span><br><span class="line">                <span class="title function_">readStreamPush</span>(buffer);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (err || done) &#123;</span><br><span class="line">                <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;end&#x27;</span>);</span><br><span class="line"></span><br><span class="line">                watcher.<span class="title function_">close</span>();</span><br><span class="line">                pushStream.<span class="title function_">close</span>();</span><br><span class="line">                <span class="title function_">readStreamPush</span>();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (timeout) &#123;</span><br><span class="line">                    <span class="built_in">clearTimeout</span>(timeout);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (timeout) &#123;</span><br><span class="line">                <span class="built_in">clearTimeout</span>(timeout);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            timeout = <span class="built_in">setTimeout</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">                watcher.<span class="title function_">close</span>();</span><br><span class="line">                pushStream.<span class="title function_">close</span>();</span><br><span class="line">                <span class="title function_">readStreamPush</span>();</span><br><span class="line">            &#125;, <span class="number">60</span> * <span class="number">1000</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> lastPosition = <span class="number">0</span>; <span class="comment">// 记录上次读取的位置</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">readIncrementalData</span>(<span class="params">filePath, callback</span>) &#123;</span><br><span class="line">    fs.<span class="title function_">open</span>(filePath, <span class="string">&#x27;r&#x27;</span>, <span class="function">(<span class="params">err, fd</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (err) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">callback</span>(err);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 定位到上次读取的位置</span></span><br><span class="line">        fs.<span class="title function_">fstat</span>(fd, <span class="function">(<span class="params">err, stats</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (err) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="title function_">callback</span>(err);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">const</span> currentPosition = stats.<span class="property">size</span>;</span><br><span class="line">            <span class="keyword">const</span> bufferLength = currentPosition - lastPosition;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (bufferLength &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">const</span> buffer = <span class="title class_">Buffer</span>.<span class="title function_">alloc</span>(bufferLength);</span><br><span class="line">                fs.<span class="title function_">read</span>(fd, buffer, <span class="number">0</span>, bufferLength, lastPosition, <span class="function">(<span class="params">err, bytesRead, buffer</span>) =&gt;</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="title function_">callback</span>(err);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// 处理读取到的内容</span></span><br><span class="line">                    <span class="title function_">callback</span>(<span class="literal">null</span>, buffer);</span><br><span class="line"></span><br><span class="line">                    lastPosition = currentPosition; <span class="comment">// 更新上次读取的位置</span></span><br><span class="line"></span><br><span class="line">                    fs.<span class="title function_">close</span>(fd);</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="title function_">callback</span>(<span class="literal">null</span>, <span class="literal">null</span>, <span class="literal">true</span>);</span><br><span class="line">                fs.<span class="title function_">close</span>(fd);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里加了一个定时，如果一分钟后文件大小不再改变，则视为文件读取完毕。</p>
+<h3 id="格式转换"><a href="#格式转换" class="headerlink" title="格式转换"></a>格式转换</h3><p>此时还会遇到的问题是，转写结果不准确，转写结果偏移量也不准确。经排查，推送的录音文件格式与 azure 要求的不符。  </p>
+<p>要求是 <code>WAV audio files, including 16-bit, mono PCM, 8 kHz, and 16 kHz</code>.  </p>
+<p>那就还需要将上面的文件流进行格式转换，再送去推流。</p>
+<p>关键代码如下:  </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> ffmpeg = <span class="built_in">require</span>(<span class="string">&#x27;fluent-ffmpeg&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; <span class="title class_">Readable</span> &#125; = <span class="built_in">require</span>(<span class="string">&#x27;stream&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createConversionStream</span>(<span class="params">callback</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> readStream = <span class="keyword">new</span> <span class="title class_">Readable</span>();</span><br><span class="line">    readStream.<span class="property">_read</span> = <span class="function">() =&gt;</span> &#123; &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> command = <span class="title function_">ffmpeg</span>()</span><br><span class="line">        .<span class="title function_">input</span>(readStream)</span><br><span class="line">        .<span class="title function_">audioFrequency</span>(<span class="number">16000</span>)</span><br><span class="line">        .<span class="title function_">audioChannels</span>(<span class="number">1</span>)</span><br><span class="line">        .<span class="title function_">audioCodec</span>(<span class="string">&#x27;pcm_s16le&#x27;</span>)</span><br><span class="line">        .<span class="title function_">on</span>(<span class="string">&#x27;error&#x27;</span>, <span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="title function_">callback</span>(err);</span><br><span class="line">        &#125;)</span><br><span class="line">        .<span class="title function_">on</span>(<span class="string">&#x27;end&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            <span class="title function_">callback</span>(<span class="literal">null</span>, <span class="literal">null</span>);</span><br><span class="line">        &#125;)</span><br><span class="line">        .<span class="title function_">format</span>(<span class="string">&#x27;wav&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    command</span><br><span class="line">        .<span class="title function_">pipe</span>()</span><br><span class="line">        .<span class="title function_">on</span>(<span class="string">&#x27;data&#x27;</span>, <span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="title function_">callback</span>(<span class="literal">null</span>, data);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">function</span> (<span class="params">buffer</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (buffer) &#123;</span><br><span class="line">            readStream.<span class="title function_">push</span>(buffer);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (command &amp;&amp; <span class="keyword">typeof</span> command.<span class="property">kill</span> === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">                command.<span class="title function_">kill</span>();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">    createConversionStream,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码可视作返回输出流，直接送入封装的转写服务即可。</p>
+<h2 id="转写结果展示"><a href="#转写结果展示" class="headerlink" title="转写结果展示"></a>转写结果展示</h2><p>在页面展示时，实现了一个类似于微信对话框的样式，可以直接用于展示转写结果，一左一右，坐席与客户。因为项目中有知识库，如果对话中涉及到了知识库设置的关键词，需要将关键词高亮显示，同时点击时要弹出知识库的内容。此处参考了类似于B站评论区的关键词的高亮样式。词语变色，右上角加了放大镜。  </p>
+<p>将转写结果存入 elasticsearch 中，可以很方便的实现这一点。  </p>
+<p>首先在前端实现一个自定义标签<code>&lt;search-keywords&gt;</code>，完成样式和点击的功能。  </p>
+<p>在实时转写的查询中，加入知识库的关键字作为匹配条件，使用 elasticsearch 的 match_phrase 查询。给匹配到的关键词加上标签，返回到前端时就能渲染了。  </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">query.<span class="property">body</span>.<span class="property">highlight</span> = &#123;</span><br><span class="line">    <span class="string">&quot;fields&quot;</span>: &#123;</span><br><span class="line">        [highlightField]: &#123;</span><br><span class="line">            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;unified&quot;</span>,</span><br><span class="line">            <span class="string">&quot;number_of_fragments&quot;</span>: <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;pre_tags&quot;</span>: [<span class="string">&quot;&lt;search-keywords&gt;&quot;</span>],</span><br><span class="line">    <span class="string">&quot;post_tags&quot;</span>: [<span class="string">&quot;&lt;/search-keywords&gt;&quot;</span>],</span><br><span class="line">    <span class="string">&quot;require_field_match&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">&quot;encoder&quot;</span>: <span class="string">&quot;html&quot;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>本文为<a target="_blank" rel="noopener" href="https://github.com/Catinsides">个人原创</a>，转载请署名且注明出处。</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/Javascript/" rel="tag">Javascript</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <span id="article-nav-newer" class="article-nav-link-wrap newer"></span>
+  
+  
+    <a href="/2024/03/28/Hello-Again/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          Hello Again
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>
