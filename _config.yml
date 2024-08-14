@@ -104,3 +104,9 @@ deploy:
   type: 'git'
   repo: 'https://github.com/Catinsides/catinsides.github.io.git'
   branch: master
+
+excerpt:
+  depth: 2
+  excerpt_excludes: []
+  more_excludes: []
+  hideWholePostExcerpts: true
