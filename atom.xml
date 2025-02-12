@@ -6,7 +6,7 @@
   <link href="https://catinsides.github.io/atom.xml" rel="self"/>
   
   <link href="https://catinsides.github.io/"/>
-  <updated>2024-08-15T06:29:09.648Z</updated>
+  <updated>2025-02-12T08:35:27.476Z</updated>
   <id>https://catinsides.github.io/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>记一次VOIP服务端开发并对接AI</title>
+    <link href="https://catinsides.github.io/2025/02/12/%E8%AE%B0%E4%B8%80%E6%AC%A1VOIP%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91%E5%B9%B6%E5%AF%B9%E6%8E%A5AI/"/>
+    <id>https://catinsides.github.io/2025/02/12/%E8%AE%B0%E4%B8%80%E6%AC%A1VOIP%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91%E5%B9%B6%E5%AF%B9%E6%8E%A5AI/</id>
+    <published>2025-02-12T07:47:42.000Z</published>
+    <updated>2025-02-12T08:35:27.476Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近接到了一个新需求，是通过 WebRTC 通话对接到一个 AI 语音助手。  </p><p>现在正是 AI 的大热潮，做这样一个功能，也是个好机会，可以学习一下相关知识。  </p><p>对接的 AI 使用的是 <a href="https://www.ultravox.ai/">Ultravox.ai</a>。  </p><p>虽然他们提供了一些集成到电话的功能，但是都是些国外的服务商，而我们需要集成到自己的系统上，所以不满足需求。  </p><p>首先要解决的问题是，在客户端与服务端实现完整的通话流程。我不太理解的是，为什么不使用 Asterisk 或者 Freeswitch，而是要自己造轮子。  </p><p>在我接手之前，有同事已经做了一个 nodejs 版的 demo 中的 demo，实现了 SIP 和 SDP 消息的对接，媒体使用 FFmpeg 处理，总体流程是 OK 的。  </p><p>但是由于是 demo 级别的，没有工程化处理，也没有考虑后续的扩展性，再往上堆彻功能的话有些吃力。尽管如此我还是在他的 demo 之上，完成了 FFmpeg 转码和 Azure 语音转文字等功能。  </p><p>为了学习如何在服务端更好的处理会话，寻找更好的编程模式，我开始到 github 寻找其他开源项目学习。一开始只找 nodejs 相关的项目，找到了 node.js-sip 这个项目。  </p><p>这个项目整体结构比先前的 demo 稍好一些，但是也很久不维护了，代码看起来也很随意，运行起来遇到不少问题。自己 fork 过来后，改了一段时间，还是受不了，继续寻找其他的项目。  </p><p>在一番搜索下，发现 nodejs 相关的库实在是太少了。因为我自己之前自学了 golang，感觉用它写项目也能 hold 住，就开始找相关的库。  </p><p>还真别说，找到了质量很高的库 diago。基本上可以说能够开箱即用，可以直接对接到我们系统的 WebRTC 通话，代码很优雅，功能丰富。  </p><p>在使用 diago 开发的过程中，还遇到了不满足自身需求的情况，我尝试修改了源码提了 PR（人生第一次给外国人提），这给我激动的，生怕给我拒绝了。  </p><p>过了几天一看，作者提了一些修改建议，我修改之后作者就给合并了，给我高兴发财了嘿嘿嘿。  </p><p>话说回来，在实现与 WEBRTC 对接之后，开始考虑如何与 Ultravox 对接。  </p><p>Ultravox 提供的方案是，使用 http 请求创建通话，然后返回一个 websocket 连接。客户端的媒体数据从这个 ws 连接发给 ultravox，ultravox 再从这个 ws 返回媒体数据，我再将媒体数据写回客户端。  </p><p>媒体的流程大概是这样的  </p><p>RTP -&gt; websocket -&gt; RTP</p><p>从 WebRTC 过来的媒体数据要发送到 websocket 涉及到格式转换，diago 方便地提供了这些方法，可以将 g711 格式转换成 PCM，这样就可以直接写入到 websocket 中去了。  </p><p>ultravox 返回的是 PCM 数据，同样可以使用 diago 提供的方法再转换为 g711，这样就节省了很多力气。  </p><p>ultravox 除了返回媒体数据外，也返回了数据消息，如 AI 语音转文字的结果，后续可以将这些文字结果入库，根据业务需求调整。  </p><p>现在回想起整个的开发过程，虽然描述起来感觉很轻松，但是期间也遇到了不少困难。期间也通过了不少 GPT 解决了问题，现在的 AI 用得好的话，也是能武装我们这些开发人员的。</p><p>不知道怎么接着往下写了，先这样吧~</p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;最近接到了一个新需求，是通过 WebRTC 通话对接到一个 AI 语音助手。  &lt;/p&gt;
+&lt;p&gt;现在正是 AI 的大热潮，做这样一个功能，也是个好机会，可以学习一下相关知识。  &lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="笔记" scheme="https://catinsides.github.io/tags/%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="AI" scheme="https://catinsides.github.io/tags/AI/"/>
+    
+    <category term="VOIP" scheme="https://catinsides.github.io/tags/VOIP/"/>
+    
+  </entry>
   
   <entry>
     <title>记一次浏览器插件开发经历</title>
@@ -391,29 +415,6 @@
     <category term="Hello world" scheme="https://catinsides.github.io/tags/Hello-world/"/>
     
     <category term="PHP" scheme="https://catinsides.github.io/tags/PHP/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="https://catinsides.github.io/2016/11/24/hello-world/"/>
-    <id>https://catinsides.github.io/2016/11/24/hello-world/</id>
-    <published>2016-11-24T15:15:30.000Z</published>
-    <updated>2024-03-28T02:14:10.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>Hello,world!<br>:)</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;Hello,world!&lt;br&gt;:)&lt;/p&gt;
-</summary>
-      
-    
-    
-    
-    
-    <category term="Hello world" scheme="https://catinsides.github.io/tags/Hello-world/"/>
     
   </entry>
   
